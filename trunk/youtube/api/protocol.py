@@ -28,7 +28,7 @@ class YoutubeUser:
             logging.debug(data)
         except:
             logging.critical("Unable to open " + url)
-            print youtube.api.PLAYLISTS_URI_ERROR % url
+            print youtube.api.PLAYLISTS_URI_ERROR % self.__username__ 
             sys.exit(1) 
             
 
@@ -39,6 +39,19 @@ class YoutubeUser:
         pass
 
     def getProfile(self):
+        url = youtube.api.PROFILE_URI % (self.__username__)
+        logging.debug(url)
+
+        try:
+            urlObj = urllib2.urlopen(url)
+            data   = urlObj.read()
+            logging.debug(data)
+        except:
+            logging.critical("Unable to get profile for " + 
+                self.__username__)
+            print youtube.api.PROFILE_URI_ERROR % self.__username__ 
+            sys.exit(1) 
+
         pass
 
     def getContacts(self):
@@ -51,5 +64,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     youtubeUser = YoutubeUser(sys.argv[1])
+    youtubeUser.getProfile()
     youtubeUser.getPlaylists()
  
