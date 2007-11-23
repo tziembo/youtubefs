@@ -9,13 +9,15 @@ logging.basicConfig(level=logging.DEBUG,
                     filemode='w')
 
 PLAYLISTS_URI       = "http://gdata.youtube.com/feeds/" +\
-                        "projection/users/%s/playlists"
+                        "api/users/%s/playlists"
+
+PLAYLISTS_URI_ERROR = "Unable to access playlist for %s"
 
 PROFILE_URI         = "http://gdata.youtube.com/feeds/"+\
-                        "projection/users/%s" 
+                        "api/users/%s" 
 
 CONTACTS_URI        = "http://gdata.youtube.com/feeds/" +\
-                        "projection/users/%s/contacts" 
+                        "api/users/%s/contacts" 
 
 SUBSCRIPTIONS_URI   = "http://gdata.youtube.com/feeds/" +\
-                        "projection/users/%s/subscriptions"
+                        "api/users/%s/subscriptions"

@@ -22,6 +22,16 @@ class YoutubeUser:
         url = youtube.api.PLAYLISTS_URI % (self.__username__)
         logging.debug(url)
 
+        try:
+            urlObj = urllib2.urlopen(url)
+            data   = urlObj.read()
+            logging.debug(data)
+        except:
+            logging.critical("Unable to open " + url)
+            print youtube.api.PLAYLISTS_URI_ERROR % url
+            sys.exit(1) 
+            
+
     def getFavourities(self):
         pass
 
