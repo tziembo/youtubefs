@@ -11,10 +11,12 @@ logging.basicConfig(level=logging.DEBUG,
 PLAYLISTS_URI       = "http://gdata.youtube.com/feeds/" +\
                         "api/users/%s/playlists"
 
-PLAYLISTS_URI_ERROR = "Unable to access playlist for %s"
+PLAYLISTS_URI_ERROR = "Unable to get the playlists for %s"
 
 PROFILE_URI         = "http://gdata.youtube.com/feeds/"+\
-                        "api/users/%s" 
+                        "api/users/%s"
+ 
+PROFILE_URI_ERROR = "Unable to access the profile for %s"
 
 CONTACTS_URI        = "http://gdata.youtube.com/feeds/" +\
                         "api/users/%s/contacts" 
