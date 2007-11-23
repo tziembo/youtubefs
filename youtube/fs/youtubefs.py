@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
 import sys
+from fuse import Fuse
 from youtube.api.protocol import YoutubeVideo
 from youtube.api.protocol import YoutubePlaylist
 from youtube.api.protocol import YoutubeUser
 
-class YoutubeFS:
+class YoutubeFS(Fuse):
     """
     
     """
