@@ -13,11 +13,59 @@ class YoutubePlaylist:
         self.title = ""  
         self.ctime = ""
         self.mtime = ""
+        splits           = self.id.split('/')
+        self.playlist_id = splits[len(splits) - 1]
+   
+    def getVideos(self):
+        videos = []
+        url    = youtube.api.PLAYLIST_VIDEOS_URI\
+            % self.playlist_id   
+        logging.debug(url)
+
+        try:
+            urlObj = urllib2.urlopen(url)
+            data   = urlObj.read()
+        except:
+            logging.critical("Unable to open " + url)
+            print youtube.api.PLAYLIST_VIDEOS_ERROR % self.playlist_id 
+
+        dom = xml.dom.minidom.parseString(data)
+        try:
+            for entry in dom.getElementsByTagName('entry'):
+                id = (entry.getElementsByTagName('id')[0]).firstChild.data
+                video = YoutubeVideo(id)
+                logging.debug("Video id: " + video.id)
+
+                video.title =  \
+                    (entry.getElementsByTagName('title')[0]).firstChild.data
+                logging.debug("Video title: " + video.title)
+
+                video.mtime = \
+                    (entry.getElementsByTagName('updated')[0]).firstChild.data
+                logging.debug("Video mtime: " + video.mtime)
+
+                videos.append(video)
+
+                mediaGroup      = (entry.getElementsByTagName('media:group')[0])
+                mediaContent    = (mediaGroup.getElementsByTagName('media:content'))
+
+                if mediaContent:
+                    print mediaContent[0].toxml()
+
+        except:
+            logging.critical("Invalid video XML format " + \
+                        str(sys.exc_info()[0]))
+
+        return videos
 
 class YoutubeVideo:
-    def __init__(self,videoURL,playlistId):
-        self.__videoURL__   = videoURL
-        self.__playlistID__ = playlistId
+    def __init__(self,id):
+        self.id = id
+        self.title = ""  
+        self.ctime = ""
+        self.mtime = ""
+        splits           = self.id.split('/')
+        self.video_id = splits[len(splits) - 1]
 
 class YoutubeUser:
     def __init__(self,username):
@@ -32,10 +80,8 @@ class YoutubeUser:
         try:
             urlObj = urllib2.urlopen(url)
             data   = urlObj.read()
-            logging.debug(data)
         except:
             logging.critical("Unable to open " + url)
-            print youtube.api.PLAYLISTS_URI_ERROR % self.__username__ 
 
         dom = xml.dom.minidom.parseString(data)
         try:
@@ -59,7 +105,8 @@ class YoutubeUser:
         except:            
             logging.critical("Invalid playlist XML format " + \
                         str(sys.exc_info()[0]))
-            print "Invalid playlist XML format" + url
+
+        return playlists        
 
     def getFavourities(self):
         pass
@@ -74,7 +121,6 @@ class YoutubeUser:
         try:
             urlObj = urllib2.urlopen(url)
             data   = urlObj.read()
-            logging.debug(data)
         except:
             logging.critical("Unable to get profile for " + 
                 self.__username__)
@@ -92,5 +138,8 @@ if __name__ == "__main__":
 
     youtubeUser = YoutubeUser(sys.argv[1])
     youtubeUser.getProfile()
-    youtubeUser.getPlaylists()
+    playlists = youtubeUser.getPlaylists()
+    for playlist in playlists:
+        playlist.getVideos()
+
  
