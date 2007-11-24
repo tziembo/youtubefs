@@ -13,6 +13,10 @@ PLAYLISTS_URI       = "http://gdata.youtube.com/feeds/" +\
 
 PLAYLISTS_URI_ERROR = "Unable to get the playlists for %s"
 
+PLAYLIST_VIDEOS_URI = "http://gdata.youtube.com/feeds/api/" +\
+                        "playlists/%s"
+PLAYLIST_VIDEOS_ERROR = "Unable to get the videos for %s"
+
 PROFILE_URI         = "http://gdata.youtube.com/feeds/"+\
                         "api/users/%s"
  
