@@ -23,3 +23,11 @@ CONTACTS_URI        = "http://gdata.youtube.com/feeds/" +\
 
 SUBSCRIPTIONS_URI   = "http://gdata.youtube.com/feeds/" +\
                         "api/users/%s/subscriptions"
+
+def getXMLText(self,nodelist):
+        rc = ""
+        for node in nodelist:
+            if node.nodeType == node.TEXT_NODE:
+                rc = rc + node.data
+        return rc
+

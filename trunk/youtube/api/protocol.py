@@ -4,10 +4,15 @@ import logging
 import urllib2
 import sys
 import youtube.api
+import xml.dom.minidom
+
 
 class YoutubePlaylist:
     def __init__(self,id):
-        self.__id__ = id   
+        self.id = id
+        self.title = ""  
+        self.ctime = ""
+        self.mtime = ""
 
 class YoutubeVideo:
     def __init__(self,videoURL,playlistId):
@@ -17,8 +22,10 @@ class YoutubeVideo:
 class YoutubeUser:
     def __init__(self,username):
         self.__username__ = username
- 
+
     def getPlaylists(self):
+        
+        playlists = []
         url = youtube.api.PLAYLISTS_URI % (self.__username__)
         logging.debug(url)
 
@@ -29,8 +36,30 @@ class YoutubeUser:
         except:
             logging.critical("Unable to open " + url)
             print youtube.api.PLAYLISTS_URI_ERROR % self.__username__ 
-            sys.exit(1) 
-            
+
+        dom = xml.dom.minidom.parseString(data)
+        try:
+            for entry in dom.getElementsByTagName('entry'):
+                id = (entry.getElementsByTagName('id')[0]).firstChild.data
+                pl = YoutubePlaylist(id)
+                logging.debug("Playlist id: " + pl.id)
+
+                pl.title =  \
+                    (entry.getElementsByTagName('title')[0]).firstChild.data
+                logging.debug("Playlist title: " + pl.title)
+
+                pl.ctime = \
+                    (entry.getElementsByTagName('published')[0]).firstChild.data
+                logging.debug("Playlist ctime: " + pl.ctime)
+
+                pl.mtime = \
+                    (entry.getElementsByTagName('updated')[0]).firstChild.data
+                logging.debug("Playlist mtime: " + pl.mtime)
+                playlists.append(pl)
+        except:            
+            logging.critical("Invalid playlist XML format " + \
+                        str(sys.exc_info()[0]))
+            print "Invalid playlist XML format" + url
 
     def getFavourities(self):
         pass
@@ -51,8 +80,6 @@ class YoutubeUser:
                 self.__username__)
             print youtube.api.PROFILE_URI_ERROR % self.__username__ 
             sys.exit(1) 
-
-        pass
 
     def getContacts(self):
         pass
