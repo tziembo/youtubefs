@@ -15,3 +15,11 @@ class YoutubeFS_Dentry:
 
 class YoutubeFS_File:
     pass 
+
+class YoutubeFS_DentryCache:
+    pass
+
+class YoutubeFS_InodeCache:
+    pass
+
+
