@@ -14,18 +14,18 @@ class YoutubePlaylist:
         self.mtime = ""
         splits           = self.id.split('/')
         self.playlist_id = splits[len(splits) - 1]
+        self.url    = youtube.api.PLAYLIST_VIDEOS_URI\
+            % self.playlist_id   
    
     def getVideos(self):
         videos = []
-        url    = youtube.api.PLAYLIST_VIDEOS_URI\
-            % self.playlist_id   
-        logging.debug(url)
+        logging.debug(self.url)
 
         try:
-            urlObj = urllib2.urlopen(url)
+            urlObj = urllib2.urlopen(self.url)
             data   = urlObj.read()
         except:
-            logging.critical("Unable to open " + url)
+            logging.critical("Unable to open " + self.url)
             print youtube.api.PLAYLIST_VIDEOS_ERROR % self.playlist_id 
 
         dom = xml.dom.minidom.parseString(data)
@@ -123,46 +123,10 @@ class YoutubeUser:
         videos = []
         url    = youtube.api.FAVOURITES_URI\
             % self.__username__
-        logging.debug(url)
-
-        try:
-            urlObj = urllib2.urlopen(url)
-            data   = urlObj.read()
-        except:
-            logging.critical("Unable to open " + url)
-
-        dom = xml.dom.minidom.parseString(data)
-        try:
-            for entry in dom.getElementsByTagName('entry'):
-                id = (entry.getElementsByTagName('id')[0]).firstChild.data
-                video = YoutubeVideo(id)
-                logging.debug("Video id: " + video.id)
-
-                video.title =  \
-                    (entry.getElementsByTagName('title')[0]).firstChild.data
-                logging.debug("Video title: " + video.title)
-
-                video.mtime = \
-                    (entry.getElementsByTagName('updated')[0]).firstChild.data
-                logging.debug("Video mtime: " + video.mtime)
-
-
-                mediaGroup      = (entry.getElementsByTagName('media:group')[0])
-                mediaContent    = (mediaGroup.getElementsByTagName('media:content'))
-
-                if mediaContent and \
-                        mediaContent[0].getAttribute('type') \
-                            == "application/x-shockwave-flash":
-                    video.url = mediaContent[0].getAttribute('url') 
-                else:
-                    continue
-                videos.append(video)
-
-        except:
-            logging.critical("Invalid video XML format " + \
-                        str(sys.exc_info()[0]))
-
-        return videos
+        favourities = YoutubePlaylist(url) 
+        favourities.url = url
+        return favourities.getVideos() 
+    
     def getSubscriptions(self):
         pass
 
@@ -191,6 +155,9 @@ if __name__ == "__main__":
     youtubeUser = YoutubeUser(sys.argv[1])
     youtubeUser.getProfile()
     favourities = youtubeUser.getFavourities()
+    for video in favourities:
+        print video
+
     playlists = youtubeUser.getPlaylists()
     for playlist in playlists:
         playlist.getVideos()
