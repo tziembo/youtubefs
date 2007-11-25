@@ -22,6 +22,9 @@ PROFILE_URI         = "http://gdata.youtube.com/feeds/"+\
  
 PROFILE_URI_ERROR = "Unable to access the profile for %s"
 
+FAVOURITES_URI   = \
+    "http://gdata.youtube.com/feeds/api/users/%s/favorites"
+
 CONTACTS_URI        = "http://gdata.youtube.com/feeds/" +\
                         "api/users/%s/contacts" 
 

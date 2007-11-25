@@ -6,7 +6,6 @@ import sys
 import youtube.api
 import xml.dom.minidom
 
-
 class YoutubePlaylist:
     def __init__(self,id):
         self.id = id
@@ -44,13 +43,17 @@ class YoutubePlaylist:
                     (entry.getElementsByTagName('updated')[0]).firstChild.data
                 logging.debug("Video mtime: " + video.mtime)
 
-                videos.append(video)
 
                 mediaGroup      = (entry.getElementsByTagName('media:group')[0])
                 mediaContent    = (mediaGroup.getElementsByTagName('media:content'))
 
-                if mediaContent:
-                    print mediaContent[0].toxml()
+                if mediaContent and \
+                        mediaContent[0].getAttribute('type') \
+                            == "application/x-shockwave-flash":
+                    video.url =  mediaContent[0].getAttribute('url')
+                else:
+                    continue
+                videos.append(video)
 
         except:
             logging.critical("Invalid video XML format " + \
@@ -64,8 +67,16 @@ class YoutubeVideo:
         self.title = ""  
         self.ctime = ""
         self.mtime = ""
+        self.url   = ""
         splits           = self.id.split('/')
         self.video_id = splits[len(splits) - 1]
+
+    def __str__(self):
+        str = self.id + "\n" + \
+            self.title + "\n" + \
+            self.url   
+        return str
+            
 
 class YoutubeUser:
     def __init__(self,username):
@@ -109,8 +120,49 @@ class YoutubeUser:
         return playlists        
 
     def getFavourities(self):
-        pass
+        videos = []
+        url    = youtube.api.FAVOURITES_URI\
+            % self.__username__
+        logging.debug(url)
 
+        try:
+            urlObj = urllib2.urlopen(url)
+            data   = urlObj.read()
+        except:
+            logging.critical("Unable to open " + url)
+
+        dom = xml.dom.minidom.parseString(data)
+        try:
+            for entry in dom.getElementsByTagName('entry'):
+                id = (entry.getElementsByTagName('id')[0]).firstChild.data
+                video = YoutubeVideo(id)
+                logging.debug("Video id: " + video.id)
+
+                video.title =  \
+                    (entry.getElementsByTagName('title')[0]).firstChild.data
+                logging.debug("Video title: " + video.title)
+
+                video.mtime = \
+                    (entry.getElementsByTagName('updated')[0]).firstChild.data
+                logging.debug("Video mtime: " + video.mtime)
+
+
+                mediaGroup      = (entry.getElementsByTagName('media:group')[0])
+                mediaContent    = (mediaGroup.getElementsByTagName('media:content'))
+
+                if mediaContent and \
+                        mediaContent[0].getAttribute('type') \
+                            == "application/x-shockwave-flash":
+                    video.url = mediaContent[0].getAttribute('url') 
+                else:
+                    continue
+                videos.append(video)
+
+        except:
+            logging.critical("Invalid video XML format " + \
+                        str(sys.exc_info()[0]))
+
+        return videos
     def getSubscriptions(self):
         pass
 
@@ -138,6 +190,7 @@ if __name__ == "__main__":
 
     youtubeUser = YoutubeUser(sys.argv[1])
     youtubeUser.getProfile()
+    favourities = youtubeUser.getFavourities()
     playlists = youtubeUser.getPlaylists()
     for playlist in playlists:
         playlist.getVideos()
