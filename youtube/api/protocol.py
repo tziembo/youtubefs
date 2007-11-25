@@ -71,6 +71,10 @@ class YoutubeVideo:
         splits           = self.id.split('/')
         self.video_id = splits[len(splits) - 1]
 
+    def getContents(self):
+        content = youtube.api.META_TAG % self.url
+        return content        
+
     def __str__(self):
         str = self.id + "\n" + \
             self.title + "\n" + \
