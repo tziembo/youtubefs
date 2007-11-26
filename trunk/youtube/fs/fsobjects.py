@@ -3,23 +3,36 @@
 import youtube.api.protocol.YoutubeVideo
 import youtube.api.protocol.YoutubePlaylist
 import youtube.api.protocol.YoutubeUser
+import time
+import os
 
-class YoutubeFS_SB:
-    pass
+class YoutubeFSInode:
+    def __init__(self,id,ctime,mtime):
+       self.id      = id 
+       self.ctime   = ctime
+       self.mtime   = mtime
+       self.atime   = int(time.time()) 
 
-class YoutubeFS_Inode:
-    pass
+class YoutubeFSFileInode(YoutubeFS_Inode):
+    def __init__(self,id,ctime,mtime\
+            title,url,type):
+       YoutubeFS_Inode.__init__(id,ctime,\
+                mtime)
+       self.title   = title
+       self.title   = title
+       self.url     = url
+       self.type    = type  
 
-class YoutubeFS_Dentry:
-    pass
+class YoutubeFSDirInode(YoutubeFS_Inode):
+    def __init__(self,id,ctime,mtime\
+            title,url,type):
+       YoutubeFS_Inode.__init__(id,ctime,\
+                mtime)
+       self.title   = title
+       self.url     = url
+       self.type    = type  
 
-class YoutubeFS_File:
-    pass 
-
-class YoutubeFS_DentryCache:
-    pass
-
-class YoutubeFS_InodeCache:
+class YoutubeFSInodeCache:
     pass
 
 
