@@ -19,7 +19,6 @@ class YoutubeFSFileInode(YoutubeFS_Inode):
        YoutubeFS_Inode.__init__(id,ctime,\
                 mtime)
        self.title   = title
-       self.title   = title
        self.url     = url
        self.type    = type  
 
