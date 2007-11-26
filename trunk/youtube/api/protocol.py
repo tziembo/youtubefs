@@ -127,13 +127,17 @@ class YoutubeUser:
 
         return playlists        
 
+    """
+        Returns a YoutubePlaylist object containing all
+        of the user's favourite videos.
+    """
     def getFavourities(self):
         videos = []
         url    = youtube.api.FAVOURITES_URI\
             % self.__username__
         favourities = YoutubePlaylist(url) 
         favourities.url = url
-        return favourities.getVideos() 
+        return favourities 
     
     def getSubscriptions(self):
         pass
