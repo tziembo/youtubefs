@@ -44,7 +44,6 @@ class YoutubeFS(Fuse):
         -errno.ENOSYS
 
     def mythread ( self ):
-        print '*** mythread'
         logging.debug('YoutubeFS: mythread')
         -errno.ENOSYS
 
