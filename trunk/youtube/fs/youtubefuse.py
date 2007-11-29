@@ -7,9 +7,23 @@ __license__     = "MIT"
 import sys
 import logging
 from fuse import Fuse
+from fuse import Stat
 from youtube.api.protocol import YoutubeVideo
 from youtube.api.protocol import YoutubePlaylist
 from youtube.api.protocol import YoutubeUser
+
+class YoutubeFUSEStat(Stat):
+   def __init__(self):
+       self.st_mode = 0444 
+       self.st_ino = 0 
+       self.st_dev = 0
+       self.st_nlink = 1
+       self.st_uid  = os.getuid()
+       self.st_gid  = os.getgid()
+       self.st_size = 0 
+       self.st_atime = 0
+       self.st_mtime = 0
+       self.st_ctime = 0
 
 class YoutubeFUSE(Fuse):
     """
