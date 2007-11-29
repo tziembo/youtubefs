@@ -4,7 +4,6 @@ __copyright__   = "Copyright 2007 - 2008, Vishal Patil"
 __license__     = "MIT"
 
 import logging
-
 import os, sys
 import fcntl
 try:
@@ -13,6 +12,9 @@ except ImportError:
     pass
 import fuse
 from fuse import Fuse
+from youtube.api.protocol import YoutubeUser
+from youtube.api.protocol import YoutubeVideo
+from youtube.api.protocol import YoutubePlaylist
 
 if not hasattr(fuse, '__version__'):
     raise RuntimeError, \
@@ -31,11 +33,13 @@ class YoutubeFUSE(Fuse):
     def __init__(self, *args, **kw):
         Fuse.__init__(self, *args, **kw)
         self.root = '/'
+        self.username = ""
         logging.debug("YoutubeFUSE init complete")
 
     def getattr(self, path):
         logging.debug("YoutubeFUSE getattr " + path)
-        return os.lstat("." + path)
+        attr = os.lstat("." + path)
+        return attr
 
     def readlink(self, path):
         logging.debug("YoutubeFUSE readlink " + path)
@@ -130,7 +134,7 @@ class YoutubeFUSE(Fuse):
         return os.statvfs(".")
 
     def fsinit(self):
-        logging.debug("YoutubeFUSE fsinit")
+        logging.debug("YoutubeFUSE fsinit " + self.username)
         os.chdir(self.root)
 
     class YoutubeFUSEFile(object):
