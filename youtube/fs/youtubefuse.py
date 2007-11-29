@@ -5,17 +5,19 @@ __license__     = "MIT"
 
 
 import sys
+import logging
 from fuse import Fuse
 from youtube.api.protocol import YoutubeVideo
 from youtube.api.protocol import YoutubePlaylist
 from youtube.api.protocol import YoutubeUser
 
-class YoutubeFS(Fuse):
+class YoutubeFUSE(Fuse):
     """
     
     """
     def __init__(self, *args, **kw):
         Fuse.__init__(self, *args, **kw)
+        self.root = "/"
         logging.debug('YoutubeFS: Init complete')
 
     def getattr(self, path):
@@ -78,12 +80,12 @@ class YoutubeFS(Fuse):
         -errno.ENOSYS
 
     def open ( self, path, flags ):
-        logging.debug('YoutubeFS: open ' + path + ' ' +\
-            str(flags()
+        logging.debug('YoutubeFS: open ' + path + \
+            ' ' + str(flags)) 
         -errno.ENOSYS
 
     def read ( self, path, length, offset ):
-        logging.debug('YoutubeFS: read ' + path + ' ' +
+        logging.debug('YoutubeFS: read ' + path + ' ' +\
             str(length) + ' ' + str(offset))
         -errno.ENOSYS
 
