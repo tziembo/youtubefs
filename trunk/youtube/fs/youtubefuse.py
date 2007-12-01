@@ -62,6 +62,13 @@ class YoutubeStat(Stat):
         self.st_mtime   = source.st_mtime
         self.st_ctime   = source.st_ctime
 
+    def __str__(self):
+        tuple = (self.st_mode, self.st_ino, self.st_dev, \
+                self.st_nlink, self.st_uid, self.st_gid,\
+                self.st_size, self.st_atime, self.st_mtime, \
+                self.st_ctime)        
+        return str(tuple) 
+        
 class YoutubeFUSE(Fuse):
     def __init__(self, *args, **kw):
         Fuse.__init__(self, *args, **kw)
