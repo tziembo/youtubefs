@@ -6,12 +6,14 @@ __license__     = "MIT"
 import logging
 import os, sys
 import fcntl
+import stat
 try:
     import _find_fuse_parts
 except ImportError:
     pass
 import fuse
 from fuse import Fuse
+from fuse import Stat
 from youtube.api.protocol import YoutubeUser
 from youtube.api.protocol import YoutubeVideo
 from youtube.api.protocol import YoutubePlaylist
@@ -29,6 +31,37 @@ def flag2mode(flags):
 
     return m
 
+class YoutubeStat(Stat):
+    def __init__(self):
+        self.st_ino     = ""
+        self.st_mode    = 0
+        self.st_dev     = ""
+        self.st_nlink   = 0
+        self.st_rdev    = ""
+        self.st_size    = 0
+        self.st_blksize = 0
+        self.st_blocks  = 0
+        self.st_uid     = 0 
+        self.st_gid     = 0 
+        self.st_atime   = 0
+        self.st_mtime   = 0
+        self.st_ctime   = 0
+
+    def copy(self,source):
+        self.st_ino     = source.st_ino 
+        self.st_mode    = source.st_mode 
+        self.st_dev     = source.st_dev 
+        self.st_nlink   = source.st_nlink
+        self.st_rdev    = source.st_rdev
+        self.st_size    = source.st_size
+        self.st_blksize = source.st_blksize
+        self.st_blocks  = source.st_blocks
+        self.st_uid     = source.st_uid
+        self.st_gid     = source.st_gid
+        self.st_atime   = source.st_atime
+        self.st_mtime   = source.st_mtime
+        self.st_ctime   = source.st_ctime
+
 class YoutubeFUSE(Fuse):
     def __init__(self, *args, **kw):
         Fuse.__init__(self, *args, **kw)
@@ -37,9 +70,26 @@ class YoutubeFUSE(Fuse):
         logging.debug("YoutubeFUSE init complete")
 
     def getattr(self, path):
-        logging.debug("YoutubeFUSE getattr " + path)
         attr = os.lstat("." + path)
-        return attr
+        logging.debug("YoutubeFUSE getattr " + path + " " +\
+                            str(attr))
+
+        if (path == "/"):
+            mode = stat.S_IFDIR | 0755 
+        else:
+            mode = stat.S_IFREG | 0644
+      
+        logging.debug("YoutubeFUSE old getattr " + str(attr) +\
+            " " + str(type(attr)))
+        try:
+            myattr  = YoutubeStat()
+            myattr.copy(attr)
+            myattr.st_mode = mode
+        except Exception, e:
+            logging.debug("Problem setting the attribute " +\
+                str(e))
+        logging.debug("YoutubeFUSE new getattr " + str(myattr))
+        return myattr
 
     def readlink(self, path):
         logging.debug("YoutubeFUSE readlink " + path)
