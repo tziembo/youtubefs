@@ -84,7 +84,7 @@ class YoutubeFUSE(Fuse):
         if (path == "/"):
             mode = stat.S_IFDIR | 0755 
         else:
-            mode = stat.S_IFREG | 0644
+            mode = stat.S_IFREG | 0444
       
         logging.debug("YoutubeFUSE old getattr " + str(attr) +\
             " " + str(type(attr)))
@@ -92,6 +92,7 @@ class YoutubeFUSE(Fuse):
             myattr  = YoutubeStat()
             myattr.copy(attr)
             myattr.st_mode = mode
+            myattr.st_dev  = 0
         except Exception, e:
             logging.debug("Problem setting the attribute " +\
                 str(e))
@@ -197,27 +198,37 @@ class YoutubeFUSE(Fuse):
     class YoutubeFUSEFile(object):
 
         def __init__(self, path, flags, *mode):
+            logging.debug("YoutubeFUSEFile init " + path + \
+                " " + str(flags) + " " + str(mode))
+
             self.file = os.fdopen(os.open("." + path, flags, *mode),
                                   flag2mode(flags))
             self.fd = self.file.fileno()
 
         def read(self, length, offset):
+            logging.debug("YoutubeFUSEFile read " + str(length) +\
+                " " + str(offset))
             self.file.seek(offset)
             return self.file.read(length)
 
         def write(self, buf, offset):
+            logging.debug("YoutubeFUSEFile write " + str(buf) +\
+                " " + str(offset))
             self.file.seek(offset)
             self.file.write(buf)
             return len(buf)
 
         def release(self, flags):
+            logging.debug("YoutubeFUSEFile release " + str(flags))
             self.file.close()
 
         def _fflush(self):
+            logging.debug("YoutubeFUSEFile fflush")
             if 'w' in self.file.mode or 'a' in self.file.mode:
                 self.file.flush()
 
         def fsync(self, isfsyncfile):
+            logging.debug("YoutubeFUSEFile fsync " + str(isfsyncfile))
             self._fflush()
             if isfsyncfile and hasattr(os, 'fdatasync'):
                 os.fdatasync(self.fd)
@@ -225,13 +236,16 @@ class YoutubeFUSE(Fuse):
                 os.fsync(self.fd)
 
         def flush(self):
+            logging.debug("YoutubeFUSEFile flush")
             self._fflush()
             os.close(os.dup(self.fd))
 
         def fgetattr(self):
+            logging.debug("YoutubeFUSEFile fgetattr")
             return os.fstat(self.fd)
 
         def ftruncate(self, len):
+            logging.debug("YoutubeFUSEFile ftruncate")
             self.file.truncate(len)
 
         def lock(self, cmd, owner, **kw):
@@ -259,6 +273,7 @@ class YoutubeFUSE(Fuse):
 
             # Convert fcntl-ish lock parameters to Python's weird
             # lockf(3)/flock(2) medley locking API...
+            logging.debug("YoutubeFUSEFile lock")
             op = { fcntl.F_UNLCK : fcntl.LOCK_UN,
                    fcntl.F_RDLCK : fcntl.LOCK_SH,
                    fcntl.F_WRLCK : fcntl.LOCK_EX }[kw['l_type']]
