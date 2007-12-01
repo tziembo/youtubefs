@@ -24,10 +24,10 @@ Userspace nullfs-alike: mirror the filesystem tree from some point on.
                  usage=usage,dash_s_do='setsingle')
     
     server.username     = "tanuvishu"
-    server.parser.add_option(mountopt="root", metavar="PATH", default='/', \
-                             help="mirror filesystem from under PATH [default: %default]")
+    server.parser.add_option(mountopt="root", metavar="PATH", \
+       default='/', help="mirror filesystem from under PATH " +\
+                "[default: %default]")
     server.parse(values=server, errex=1)
-
     try:
         if server.fuse_args.mount_expected():
             os.chdir(server.root)

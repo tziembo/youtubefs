@@ -22,15 +22,6 @@ if not hasattr(fuse, '__version__'):
     raise RuntimeError, \
         "your fuse-py doesn't know of fuse.__version__, probably it's too old."
 
-def flag2mode(flags):
-    md = {os.O_RDONLY: 'r', os.O_WRONLY: 'w', os.O_RDWR: 'w+'}
-    m = md[flags & (os.O_RDONLY | os.O_WRONLY | os.O_RDWR)]
-
-    if flags | os.O_APPEND:
-        m = m.replace('w', 'a', 1)
-
-    return m
-
 class YoutubeStat(Stat):
     def __init__(self):
         self.st_ino     = ""
@@ -73,8 +64,13 @@ class YoutubeFUSE(Fuse):
     def __init__(self, *args, **kw):
         Fuse.__init__(self, *args, **kw)
         self.root = '/'
-        self.username = ""
         logging.debug("YoutubeFUSE init complete")
+
+    def open(self,path,flags):
+        logging.debug("YoutubeFUSE open called")
+        file = self.YoutubeFUSEFile(path,0,0)
+        logging.debug("YoutubeFUSE open completed")
+        return file 
 
     def getattr(self, path):
         attr = os.lstat("." + path)
@@ -193,7 +189,20 @@ class YoutubeFUSE(Fuse):
 
     def fsinit(self):
         logging.debug("YoutubeFUSE fsinit " + self.username)
+        self.createfs()
         os.chdir(self.root)
+
+    def createfs(self):
+        youtubeUser = YoutubeUser(self.username)
+        self.profile = youtubeUser.getProfile()
+        favourities = youtubeUser.getFavourities()
+        for video in favourities:
+            print video
+
+        playlists = youtubeUser.getPlaylists()
+        for playlist in playlists:
+            playlist.getVideos()
+
 
     class YoutubeFUSEFile(object):
 
@@ -201,9 +210,8 @@ class YoutubeFUSE(Fuse):
             logging.debug("YoutubeFUSEFile init " + path + \
                 " " + str(flags) + " " + str(mode))
 
-            self.file = os.fdopen(os.open("." + path, flags, *mode),
-                                  flag2mode(flags))
-            self.fd = self.file.fileno()
+            self.file = ""
+            self.fd = "" 
 
         def read(self, length, offset):
             logging.debug("YoutubeFUSEFile read " + str(length) +\
