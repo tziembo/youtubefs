@@ -62,3 +62,9 @@ class YoutubeFSInodeCache:
             return self.cache[id]
 
         return None 
+
+    def __str__(self):
+        str = ""
+        for k,v in self.cache.iteritems():
+            str = str + ("%s\n" % k)       
+        return str            
