@@ -16,6 +16,7 @@ from fuse import Fuse
 from youtube.api.protocol import YoutubeUser
 from youtube.api.protocol import YoutubeVideo
 from youtube.api.protocol import YoutubePlaylist
+from youtube.api.protocol import YoutubeProfile
 from youtube.fs.fsobjects import YoutubeStat
 from youtube.fs.fsobjects import YoutubeFSInodeCache
 
@@ -58,7 +59,6 @@ class YoutubeFUSE(Fuse):
             " " + str(type(attr)))
         try:
             myattr  = YoutubeStat()
-            myattr.copy(attr)
             myattr.st_mode = mode
             myattr.st_dev  = 0
         except Exception, e:
@@ -165,16 +165,21 @@ class YoutubeFUSE(Fuse):
         os.chdir(self.root)
 
     def createfs(self):
+        logging.debug("YoutubeFUSE createfs")
         self.inodeCache = YoutubeFSInodeCache()
 
         rootDirInode = YoutubeFSInode('/',0,0,0)  
         self.inodeCache.addInode(rootDirInode)
 
-        profileInode = YoutubeFSInode('/profile',0,0,0) 
+        self.youtubeUser = YoutubeUser(self.username)
+        profile = youtubeUser.getProfile()
+
+        profileInode = YoutubeFSInode('/profile',0,0,0)
+        profileInode.ctime  = profile.ctime
+        profileInode.mtime  = profile.mtime
+        profileInode.data   = profile.data
         self.inodeCache.addInode(profileInode) 
 
-        self.youtubeUser = YoutubeUser(self.username)
-        self.profile = youtubeUser.getProfile()
 
         favourities = youtubeUser.getFavourities()
         for video in favourities:

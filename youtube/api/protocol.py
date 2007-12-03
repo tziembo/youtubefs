@@ -10,6 +10,27 @@ import sys
 import youtube.api
 import xml.dom.minidom
 
+class YoutubeProfile:
+    def __init__(self):
+        self.ctime  =   ""
+        self.mtime  =   ""
+        self.age    =   "" 
+        self.username   =  ""
+        self.gender     = ""
+        self.location   = "" 
+
+    def __str__(self):
+        str =   ("Username   = %s\n" +\
+                "Gender     = %s\n" +\
+                "Age        = %s\n" +\
+                "Location   = %s\n" +\
+                "Ctime      = %s\n" +\
+                "Mtime      = %s\n") %\
+        (self.username,self.gender,self.age,self.location,\
+            self.ctime,self.mtime)
+
+        return str
+
 class YoutubePlaylist:
     def __init__(self,id):
         self.id = id
@@ -47,7 +68,6 @@ class YoutubePlaylist:
                     (entry.getElementsByTagName('updated')[0]).firstChild.data
                 logging.debug("Video mtime: " + video.mtime)
 
-
                 mediaGroup      = (entry.getElementsByTagName('media:group')[0])
                 mediaContent    = (mediaGroup.getElementsByTagName('media:content'))
 
@@ -61,7 +81,6 @@ class YoutubePlaylist:
         except:
             logging.critical("Invalid video XML format " + \
                         str(sys.exc_info()[0]))
-
         return videos
 
 class YoutubeVideo:
@@ -154,6 +173,29 @@ class YoutubeUser:
                 self.__username__)
             print youtube.api.PROFILE_URI_ERROR % self.__username__ 
             sys.exit(1) 
+
+        profile = YoutubeProfile()
+        dom = xml.dom.minidom.parseString(data)
+        logging.debug(data)
+        try:
+           for entry in dom.getElementsByTagName('entry'):
+               profile.ctime = \
+                   (entry.getElementsByTagName('published')[0]).firstChild.data
+               logging.debug("Profile ctime: " + pl.ctime)
+
+               profile.mtime = \
+                   (entry.getElementsByTagName('updated')[0]).firstChild.data
+               logging.debug("Profile mtime: " + pl.mtime)
+               
+               profile.age    =   (entry.getElementsByTagName('yt:age')[0]).firstChild.data 
+               profile.username   = (entry.getElementsByTagName('yt:username')[0]).firstChild.data  
+               profile.gender     = (entry.getElementsByTagName('yt:gender')[0]).firstChild.data 
+               profile.location   = (entry.getElementsByTagName('yt:location')[0]).firstChild.data  
+               logging.debug(("Profile: %s\n" % (profile)));
+        except:            
+           logging.critical("Invalid playlist XML format " + \
+                       str(sys.exc_info()[0]))
+        return profile
 
     def getContacts(self):
         pass
