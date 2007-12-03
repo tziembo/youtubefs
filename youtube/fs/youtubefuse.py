@@ -13,53 +13,16 @@ except ImportError:
     pass
 import fuse
 from fuse import Fuse
-from fuse import Stat
 from youtube.api.protocol import YoutubeUser
 from youtube.api.protocol import YoutubeVideo
 from youtube.api.protocol import YoutubePlaylist
+from youtube.fs.fsobjects import YoutubeStat
+from youtube.fs.fsobjects import YoutubeFSInodeCache
 
 if not hasattr(fuse, '__version__'):
     raise RuntimeError, \
         "your fuse-py doesn't know of fuse.__version__, probably it's too old."
 
-class YoutubeStat(Stat):
-    def __init__(self):
-        self.st_ino     = ""
-        self.st_mode    = 0
-        self.st_dev     = ""
-        self.st_nlink   = 0
-        self.st_rdev    = ""
-        self.st_size    = 0
-        self.st_blksize = 0
-        self.st_blocks  = 0
-        self.st_uid     = 0 
-        self.st_gid     = 0 
-        self.st_atime   = 0
-        self.st_mtime   = 0
-        self.st_ctime   = 0
-
-    def copy(self,source):
-        self.st_ino     = source.st_ino 
-        self.st_mode    = source.st_mode 
-        self.st_dev     = source.st_dev 
-        self.st_nlink   = source.st_nlink
-        self.st_rdev    = source.st_rdev
-        self.st_size    = source.st_size
-        self.st_blksize = source.st_blksize
-        self.st_blocks  = source.st_blocks
-        self.st_uid     = source.st_uid
-        self.st_gid     = source.st_gid
-        self.st_atime   = source.st_atime
-        self.st_mtime   = source.st_mtime
-        self.st_ctime   = source.st_ctime
-
-    def __str__(self):
-        tuple = (self.st_mode, self.st_ino, self.st_dev, \
-                self.st_nlink, self.st_uid, self.st_gid,\
-                self.st_size, self.st_atime, self.st_mtime, \
-                self.st_ctime)        
-        return str(tuple) 
-        
 class YoutubeFUSE(Fuse):
     def __init__(self, *args, **kw):
         Fuse.__init__(self, *args, **kw)
@@ -69,7 +32,6 @@ class YoutubeFUSE(Fuse):
     def open(self,path,flags):
         logging.debug("YoutubeFUSE open called")
         file = self.YoutubeFUSEFile(path,0,0)
-        logging.debug("YoutubeFUSE open completed")
         return file 
 
     def getattr(self, path):
@@ -193,8 +155,14 @@ class YoutubeFUSE(Fuse):
         os.chdir(self.root)
 
     def createfs(self):
-        youtubeUser = YoutubeUser(self.username)
+        self.inodeCache = YoutubeFSInodeCache()
+
+        rootDirNode = YoutubeFSInode('/',0,0,0,'root')  
+        self.inodeCache.addInode(rootDirNode.path,rootDirNode)
+
+        self.youtubeUser = YoutubeUser(self.username)
         self.profile = youtubeUser.getProfile()
+
         favourities = youtubeUser.getFavourities()
         for video in favourities:
             print video
@@ -204,56 +172,8 @@ class YoutubeFUSE(Fuse):
             playlist.getVideos()
 
 
-    class YoutubeFUSEFile(object):
-
-        def __init__(self, path, flags, *mode):
-            logging.debug("YoutubeFUSEFile init " + path + \
-                " " + str(flags) + " " + str(mode))
-
-            self.file = ""
-            self.fd = "" 
-
-        def read(self, length, offset):
-            logging.debug("YoutubeFUSEFile read " + str(length) +\
-                " " + str(offset))
-            self.file.seek(offset)
-            return self.file.read(length)
-
-        def write(self, buf, offset):
-            logging.debug("YoutubeFUSEFile write " + str(buf) +\
-                " " + str(offset))
-            return 0 
-
-        def release(self, flags):
-            logging.debug("YoutubeFUSEFile release " + str(flags))
-            self.file.close()
-
-        def _fflush(self):
-            logging.debug("YoutubeFUSEFile fflush")
-            if 'w' in self.file.mode or 'a' in self.file.mode:
-                self.file.flush()
-
-        def fsync(self, isfsyncfile):
-            logging.debug("YoutubeFUSEFile fsync " + str(isfsyncfile))
-            pass
-
-        def flush(self):
-            logging.debug("YoutubeFUSEFile flush")
-            pass
-
-        def fgetattr(self):
-            logging.debug("YoutubeFUSEFile fgetattr")
-            return os.fstat(self.fd)
-
-        def ftruncate(self, len):
-            logging.debug("YoutubeFUSEFile ftruncate")
-            pass
-
-        def lock(self, cmd, owner, **kw):
-            pass            
 
     def main(self, *a, **kw):
-        self.file_class = self.YoutubeFUSEFile
         return Fuse.main(self, *a, **kw)
 
 
