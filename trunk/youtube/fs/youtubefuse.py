@@ -19,9 +19,19 @@ from youtube.api.protocol import YoutubePlaylist
 from youtube.fs.fsobjects import YoutubeStat
 from youtube.fs.fsobjects import YoutubeFSInodeCache
 
-if not hasattr(fuse, '__version__'):
-    raise RuntimeError, \
-        "your fuse-py doesn't know of fuse.__version__, probably it's too old."
+def gdataTime2UnixTime(gdate):
+    isodate = re.compile('[.:T-]').split(gdate)
+    year        = int(isodate[0])
+    month       = int(isodate[1])
+    day         = int(isodate[2])
+    hour        = int(isodate[3])
+    minute      = int(isodate[4])
+    seconds     = int(isodate[5])
+
+    t = (datetime.datetime(year,month,day,\
+                hour,minute,seconds))
+
+    return long(mktime(t.timetuple())+1e-6*t.microsecond)
 
 class YoutubeFUSE(Fuse):
     def __init__(self, *args, **kw):
@@ -157,8 +167,11 @@ class YoutubeFUSE(Fuse):
     def createfs(self):
         self.inodeCache = YoutubeFSInodeCache()
 
-        rootDirNode = YoutubeFSInode('/',0,0,0,'root')  
-        self.inodeCache.addInode(rootDirNode.path,rootDirNode)
+        rootDirInode = YoutubeFSInode('/',0,0,0)  
+        self.inodeCache.addInode(rootDirInode)
+
+        profileInode = YoutubeFSInode('/profile',0,0,0) 
+        self.inodeCache.addInode(profileInode) 
 
         self.youtubeUser = YoutubeUser(self.username)
         self.profile = youtubeUser.getProfile()
