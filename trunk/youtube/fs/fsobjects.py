@@ -6,10 +6,9 @@ __license__     = "MIT"
 
 from fuse import Stat
 from fuse import Direntry
-import youtube.api.protocol.YoutubeVideo
-import youtube.api.protocol.YoutubePlaylist
-import youtube.api.protocol.YoutubeUser
-from youtube.fs.youtubefs import YoutubeFUSEStat
+from youtube.api.protocol import YoutubeVideo
+from youtube.api.protocol import YoutubePlaylist
+from youtube.api.protocol import YoutubeUser
 import time
 import os
 
