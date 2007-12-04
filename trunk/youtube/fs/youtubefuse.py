@@ -157,18 +157,13 @@ class YoutubeFUSE(Fuse):
         try:
             logging.debug("YoutubeFUSE createfs")
             self.inodeCache = YoutubeFSInodeCache()
-            logging.debug("YoutubeFUSE createfs: inode cache created")
 
             #
             # Added the root directory inode
             #
-            logging.debug("YoutubeFUSE createfs: creating root inode")
             mode = stat.S_IFDIR | 0755
-            logging.debug("YoutubeFUSE createfs: creating root inode mode")
             rootDirInode = YoutubeFSInode('/',mode,0,0,0)  
-            logging.debug("YoutubeFUSE createfs: creating root inode created")
             self.inodeCache.addInode(rootDirInode)
-            logging.debug("YoutubeFUSE createfs: created root inode")
 
             #
             # Add the profile file
