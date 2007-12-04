@@ -9,6 +9,8 @@ import urllib2
 import sys
 import youtube.api
 import xml.dom.minidom
+from youtube.api import gdataTime2UnixTime
+
 
 class YoutubeProfile:
     def __init__(self):
@@ -19,17 +21,20 @@ class YoutubeProfile:
         self.gender     = ""
         self.location   = "" 
 
-    def __str__(self):
-        str =   ("Username   = %s\n" +\
+    def getData(self):
+        data =   ("Username   = %s\n" +\
                 "Gender     = %s\n" +\
                 "Age        = %s\n" +\
                 "Location   = %s\n" +\
                 "Ctime      = %s\n" +\
                 "Mtime      = %s\n") %\
         (self.username,self.gender,self.age,self.location,\
-            self.ctime,self.mtime)
+            str(self.ctime),str(self.mtime))
 
-        return str
+        return data 
+
+    def __str__(self):
+        return self.getData()       
 
 class YoutubePlaylist:
     def __init__(self,id):
@@ -64,9 +69,13 @@ class YoutubePlaylist:
                     (entry.getElementsByTagName('title')[0]).firstChild.data
                 logging.debug("Video title: " + video.title)
 
+                video.ctime = \
+                    gdataTime2UnixTime((entry.getElementsByTagName('published')[0]).firstChild.data)
+                logging.debug("Video ctime: " + str(video.ctime))
+
                 video.mtime = \
-                    (entry.getElementsByTagName('updated')[0]).firstChild.data
-                logging.debug("Video mtime: " + video.mtime)
+                    gdataTime2UnixTime((entry.getElementsByTagName('updated')[0]).firstChild.data)
+                logging.debug("Video mtime: " + str(video.mtime))
 
                 mediaGroup      = (entry.getElementsByTagName('media:group')[0])
                 mediaContent    = (mediaGroup.getElementsByTagName('media:content'))
@@ -87,8 +96,8 @@ class YoutubeVideo:
     def __init__(self,id):
         self.id = id
         self.title = ""  
-        self.ctime = ""
-        self.mtime = ""
+        self.ctime = 0 
+        self.mtime = 0 
         self.url   = ""
         self.type  = ""
         splits           = self.id.split('/')
@@ -133,12 +142,12 @@ class YoutubeUser:
                 logging.debug("Playlist title: " + pl.title)
 
                 pl.ctime = \
-                    (entry.getElementsByTagName('published')[0]).firstChild.data
-                logging.debug("Playlist ctime: " + pl.ctime)
+                    gdataTime2UnixTime((entry.getElementsByTagName('published')[0]).firstChild.data)
+                logging.debug("Playlist ctime: " + str(pl.ctime))
 
                 pl.mtime = \
-                    (entry.getElementsByTagName('updated')[0]).firstChild.data
-                logging.debug("Playlist mtime: " + pl.mtime)
+                   gdataTime2UnixTime((entry.getElementsByTagName('updated')[0]).firstChild.data)
+                logging.debug("Playlist mtime: " + str(pl.mtime))
                 playlists.append(pl)
         except:            
             logging.critical("Invalid playlist XML format " + \
