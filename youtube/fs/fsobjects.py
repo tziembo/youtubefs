@@ -11,6 +11,8 @@ from youtube.api.protocol import YoutubePlaylist
 from youtube.api.protocol import YoutubeUser
 import time
 import os
+import stat
+import logging
 
 class YoutubeStat(Stat):
     def __init__(self):
@@ -36,15 +38,23 @@ class YoutubeStat(Stat):
         return str(tuple) 
 
 class YoutubeFSInode:
-    def __init__(self,path,id,ctime,mtime):
+    def __init__(self,path,mode,id,ctime,mtime):
         self.path           =   path
-        self.stat           =   YoutubeFUSEStat()
+        self.mode           =   mode
+        self.stat           =   YoutubeStat()
         self.stat.st_ino    =   id 
         self.stat.st_ctime  =   ctime 
         self.stat.st_mtime  =   mtime
         self.data           = ""
-        self.children       = []        
+        self.children       = []
 
+        logging.debug("\nYoutubeFSInode init\npath = %s\nid = %s\n" +\
+                "ctime = %s\nmtime = %s\n",self.path,\
+                self.stat.st_ino,str(self.stat.st_ctime),\
+                str(self.stat.st_mtime))
+
+    def addChildInode(self,inode):
+        self.children.append(inode)
 """
     A very basic inode cache, this data structure would be 
     modified later for speedy access as well as to decrease
