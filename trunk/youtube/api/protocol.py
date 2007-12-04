@@ -12,10 +12,10 @@ import xml.dom.minidom
 
 class YoutubeProfile:
     def __init__(self):
-        self.ctime  =   ""
-        self.mtime  =   ""
+        self.ctime  =  0 
+        self.mtime  =  0 
         self.age    =   "" 
-        self.username   =  ""
+        self.username   = ""
         self.gender     = ""
         self.location   = "" 
 
@@ -181,11 +181,13 @@ class YoutubeUser:
            for entry in dom.getElementsByTagName('entry'):
                profile.ctime = \
                    (entry.getElementsByTagName('published')[0]).firstChild.data
-               logging.debug("Profile ctime: " + pl.ctime)
+               profile.ctime = youtube.api.gdataTime2UnixTime(profile.ctime)
+               logging.debug("Profile ctime: " + str(profile.ctime))
 
                profile.mtime = \
                    (entry.getElementsByTagName('updated')[0]).firstChild.data
-               logging.debug("Profile mtime: " + pl.mtime)
+               profile.mtime = youtube.api.gdataTime2UnixTime(profile.mtime)
+               logging.debug("Profile mtime: " + str(profile.mtime))
                
                profile.age    =   (entry.getElementsByTagName('yt:age')[0]).firstChild.data 
                profile.username   = (entry.getElementsByTagName('yt:username')[0]).firstChild.data  
@@ -193,7 +195,7 @@ class YoutubeUser:
                profile.location   = (entry.getElementsByTagName('yt:location')[0]).firstChild.data  
                logging.debug(("Profile: %s\n" % (profile)));
         except:            
-           logging.critical("Invalid playlist XML format " + \
+           logging.critical("Invalid profile XML format " + \
                        str(sys.exc_info()[0]))
         return profile
 
@@ -207,13 +209,13 @@ if __name__ == "__main__":
         sys.exit(1)
 
     youtubeUser = YoutubeUser(sys.argv[1])
-    youtubeUser.getProfile()
-    favourities = youtubeUser.getFavourities()
-    for video in favourities:
-        print video
-
-    playlists = youtubeUser.getPlaylists()
-    for playlist in playlists:
-        playlist.getVideos()
+    print youtubeUser.getProfile()
+#    favourities = youtubeUser.getFavourities()
+#    for video in favourities:
+#        print video
+#
+#    playlists = youtubeUser.getPlaylists()
+#    for playlist in playlists:
+#        playlist.getVideos()
 
  
