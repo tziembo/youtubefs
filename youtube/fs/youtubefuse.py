@@ -20,20 +20,6 @@ from youtube.api.protocol import YoutubeProfile
 from youtube.fs.fsobjects import YoutubeStat
 from youtube.fs.fsobjects import YoutubeFSInodeCache
 
-def gdataTime2UnixTime(gdate):
-    isodate = re.compile('[.:T-]').split(gdate)
-    year        = int(isodate[0])
-    month       = int(isodate[1])
-    day         = int(isodate[2])
-    hour        = int(isodate[3])
-    minute      = int(isodate[4])
-    seconds     = int(isodate[5])
-
-    t = (datetime.datetime(year,month,day,\
-                hour,minute,seconds))
-
-    return long(mktime(t.timetuple())+1e-6*t.microsecond)
-
 class YoutubeFUSE(Fuse):
     def __init__(self, *args, **kw):
         Fuse.__init__(self, *args, **kw)
