@@ -61,10 +61,14 @@ class YoutubeFUSE(Fuse):
         return os.readlink("." + path)
 
     def readdir(self, path, offset):
-        logging.debug("YoutubeFUSE readdir " + path)
-        for e in os.listdir("." + path):
-            logging.debug("YoutubeFUSE direntry " + e)   
-            yield fuse.Direntry(e)
+        logging.debug("YoutubeFUSE readdir " + path + \
+                + " " + str(offset))
+
+        dirInode = self.inodeCache.getInode(self.path)
+        for entry in dirInode.children:
+            log.debug("YoutubeFUSE readdir returning subdir " + \
+                        entry)
+            yield.fuseDirentry(entry.path.strip('/').encode('ascii'))
 
     def unlink(self, path):
         logging.debug("YoutubeFUSE unlink " + path)
