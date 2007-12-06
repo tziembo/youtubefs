@@ -153,11 +153,7 @@ class YoutubeFUSE(Fuse):
         self.createfs()
         os.chdir(self.root)
 
-    def createfs(self):
-        try:
-            logging.debug("YoutubeFUSE createfs")
-            self.inodeCache = YoutubeFSInodeCache()
-
+    def __addRootInode(self):
             #
             # Added the root directory inode
             #
@@ -165,10 +161,10 @@ class YoutubeFUSE(Fuse):
             rootDirInode = YoutubeFSInode('/',mode,0,0,0)  
             self.inodeCache.addInode(rootDirInode)
 
+    def __addProfileInode(self):
             #
             # Add the profile file
             #
-            self.youtubeUser = YoutubeUser(self.username)
             profile = self.youtubeUser.getProfile()
             mode = stat.S_IFREG | 0444
             profileInode = YoutubeFSInode('/profile',mode,\
@@ -177,8 +173,10 @@ class YoutubeFUSE(Fuse):
             profileInode.mtime  = profile.mtime
             profileInode.data   = profile.getData()
             self.inodeCache.addInode(profileInode) 
+            self.rootDirInode = self.inodeCache.getInode('/')
             rootDirInode.addChildInode(profileInode)
-          
+
+    def __addFavouritesInode(self):
             #
             # Get the favourite videos
             # 
@@ -187,6 +185,7 @@ class YoutubeFUSE(Fuse):
             favouritesInode = YoutubeFSInode('/favourites',mode,\
                     0,favourities.ctime,favourities.mtime)
             self.inodeCache.addInode(favouritesInode) 
+            self.rootDirInode = self.inodeCache.getInode('/')
             rootDirInode.addChildInode(favouritesInode)
         
             for video in favourities.getVideos():
@@ -197,6 +196,21 @@ class YoutubeFUSE(Fuse):
                 videoInode.data = video.getContents()
                 self.inodeCache.addInode(favouritesInode) 
                 favouritesInode.addChildInode(videoInode)
+
+    def __addPlaylistInodes(self):
+        pass
+            
+    def createfs(self):
+        try:
+            logging.debug("YoutubeFUSE createfs")
+            self.inodeCache = YoutubeFSInodeCache()
+            self.youtubeUser = YoutubeUser(self.username)
+
+            self.__addRootInode()
+            self.__addProfileInode()     
+            self.__addFavouritesInode()
+            self.__addPlaylistInodes()       
+             
         except Exception,inst:
             logging.debug("YoutubeFUSE createfs exception : " + str(inst))
 
