@@ -55,6 +55,11 @@ class YoutubeFSInode:
 
     def addChildInode(self,inode):
         self.children.append(inode)
+
+    def __str__(self):
+        str = "\npath = %s\n,id = %s\n" % (self.path, \
+                    str(self.stat.st_ino))
+
 """
     A very basic inode cache, this data structure would be 
     modified later for speedy access as well as to decrease
