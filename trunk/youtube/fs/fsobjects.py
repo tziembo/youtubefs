@@ -16,14 +16,11 @@ import logging
 
 class YoutubeStat(Stat):
     def __init__(self):
-        self.st_ino     = ""
+        self.st_ino     = 0 
         self.st_mode    = 0
-        self.st_dev     = ""
+        self.st_dev     = 0 
         self.st_nlink   = 0
-        self.st_rdev    = ""
         self.st_size    = 0
-        self.st_blksize = 0
-        self.st_blocks  = 0
         self.st_uid     = os.getuid() 
         self.st_gid     = os.getgid()
         self.st_atime   = 0
@@ -54,6 +51,7 @@ class YoutubeFSInode:
                 str(self.stat.st_ctime),str(self.stat.st_mtime))
 
     def addChildInode(self,inode):
+        self.stat.st_nlink = self.stat.st_nlink + 1
         self.children.append(inode)
 
     def __str__(self):
