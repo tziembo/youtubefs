@@ -39,26 +39,29 @@ class YoutubeStat(Stat):
 
 class YoutubeFSInode:
     def __init__(self,path,mode,id,ctime,mtime):
-        self.path           =   path
-        self.mode           =   mode
+        self.path           =   str(path)
         self.stat           =   YoutubeStat()
-        self.stat.st_ino    =   id 
-        self.stat.st_ctime  =   ctime 
+        self.stat.mode      =   int(mode)
+        self.stat.st_ino    =   str(id)
+        self.stat.st_ctime  =   ctime
         self.stat.st_mtime  =   mtime
         self.data           = ""
         self.children       = []
 
-        logging.debug("\nYoutubeFSInode init\npath = %s\nid = %s\n" +\
-                "ctime = %s\nmtime = %s\n",self.path,\
-                self.stat.st_ino,str(self.stat.st_ctime),\
-                str(self.stat.st_mtime))
+        logging.debug("\nYoutubeFSInode init\npath = %s\nmode = %s\n" + \
+                "id = %s\nctime = %s\nmtime = %s\n",self.path,\
+                str(self.stat.mode),self.stat.st_ino,\
+                str(self.stat.st_ctime),str(self.stat.st_mtime))
 
     def addChildInode(self,inode):
         self.children.append(inode)
 
     def __str__(self):
-        str = "\npath = %s\n,id = %s\n" % (self.path, \
-                    str(self.stat.st_ino))
+        rstr = ("\nYoutubeFSInode\npath = %s\nmode = %s\n" + \
+                "id = %s\nctime = %s\nmtime = %s\n") % (self.path,\
+                str(self.stat.mode),self.stat.st_ino,\
+                str(self.stat.st_ctime),str(self.stat.st_mtime))
+        return rstr
 
 """
     A very basic inode cache, this data structure would be 
@@ -69,16 +72,18 @@ class YoutubeFSInodeCache:
     cache = {}    
 
     def addInode(self,inode):
+        logging.debug("YoutubeFSInodeCache addInode " + str(inode))
         self.cache[inode.path] = inode
 
     def getInode(self,path):
-        if self.cache.has_key(id):
-            return self.cache[id]
+        logging.debug("YoutubeFSInodeCache getInode for " + path)
+        if self.cache.has_key(path):
+            return self.cache[path]
 
         return None 
 
     def __str__(self):
-        str = ""
+        str = "YoutubeInodeCache: Printing cache\n"
         for k,v in self.cache.iteritems():
             str = str + ("%s\n" % k)       
         return str            

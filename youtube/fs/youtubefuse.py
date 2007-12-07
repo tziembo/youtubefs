@@ -39,22 +39,12 @@ class YoutubeFUSE(Fuse):
         logging.debug("YoutubeFUSE getattr " + path + " " +\
                             str(attr))
 
-        if (path == "/"):
-            mode = stat.S_IFDIR | 0755 
-        else:
-            mode = stat.S_IFREG | 0444
-      
+        inode = self.inodeCache.getInode(path)
         logging.debug("YoutubeFUSE old getattr " + str(attr) +\
             " " + str(type(attr)))
-        try:
-            myattr  = YoutubeStat()
-            myattr.st_mode = mode
-            myattr.st_dev  = 0
-        except Exception, e:
-            logging.debug("Problem setting the attribute " +\
-                str(e))
-        logging.debug("YoutubeFUSE new getattr " + str(myattr))
-        return myattr
+        logging.debug("YoutubeFUSE new getattr " + str(inode.stat))
+        print self.inodeCache
+        return inode.stat 
 
     def readlink(self, path):
         logging.debug("YoutubeFUSE readlink " + path)
@@ -68,7 +58,7 @@ class YoutubeFUSE(Fuse):
         for entry in dirInode.children:
             log.debug("YoutubeFUSE readdir returning subdir " + \
                         entry)
-            yield.fuseDirentry(entry.path.strip('/').encode('ascii'))
+            yield fuse.fuseDirentry(entry.path.strip('/').encode('ascii'))
 
     def unlink(self, path):
         logging.debug("YoutubeFUSE unlink " + path)
@@ -177,7 +167,7 @@ class YoutubeFUSE(Fuse):
             profileInode.mtime  = profile.mtime
             profileInode.data   = profile.getData()
             self.inodeCache.addInode(profileInode) 
-            self.rootDirInode = self.inodeCache.getInode('/')
+            rootDirInode = self.inodeCache.getInode('/')
             rootDirInode.addChildInode(profileInode)
 
     def __addFavouritesInode(self):
@@ -189,16 +179,16 @@ class YoutubeFUSE(Fuse):
             favouritesInode = YoutubeFSInode('/favourites',mode,\
                     0,favourities.ctime,favourities.mtime)
             self.inodeCache.addInode(favouritesInode) 
-            self.rootDirInode = self.inodeCache.getInode('/')
+            rootDirInode = self.inodeCache.getInode('/')
             rootDirInode.addChildInode(favouritesInode)
         
             for video in favourities.getVideos():
                 mode = stat.S_IFREG | 0444
-                path = "/favourites/%s" % video.title
+                path = ("/favourites/%s") % video.title
                 videoInode =  YoutubeFSInode(path,mode,\
                             video.id,video.ctime,video.mtime)
                 videoInode.data = video.getContents()
-                self.inodeCache.addInode(favouritesInode) 
+                self.inodeCache.addInode(videoInode) 
                 favouritesInode.addChildInode(videoInode)
 
     def __addPlaylistInodes(self):
@@ -214,7 +204,8 @@ class YoutubeFUSE(Fuse):
             self.__addProfileInode()     
             self.__addFavouritesInode()
             self.__addPlaylistInodes()       
-             
+            
+            print self.inodeCache 
         except Exception,inst:
             logging.debug("YoutubeFUSE createfs exception : " + str(inst))
 

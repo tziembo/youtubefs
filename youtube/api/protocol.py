@@ -4,6 +4,7 @@ __author__      = "Vishal Patil"
 __copyright__   = "Copyright 2007 - 2008, Vishal Patil"
 __license__     = "MIT"
 
+import time
 import logging
 import urllib2
 import sys
@@ -40,8 +41,8 @@ class YoutubePlaylist:
     def __init__(self,id):
         self.id = id
         self.title = ""  
-        self.ctime = ""
-        self.mtime = ""
+        self.ctime = long(time.time())
+        self.mtime = long(time.time())
         splits           = self.id.split('/')
         self.playlist_id = splits[len(splits) - 1]
         self.url    = youtube.api.PLAYLIST_VIDEOS_URI\
