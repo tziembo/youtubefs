@@ -24,8 +24,8 @@ class YoutubeStat(Stat):
         self.st_size    = 0
         self.st_blksize = 0
         self.st_blocks  = 0
-        self.st_uid     = 0 
-        self.st_gid     = 0 
+        self.st_uid     = os.getuid() 
+        self.st_gid     = os.getgid()
         self.st_atime   = 0
         self.st_mtime   = 0
         self.st_ctime   = 0
@@ -38,9 +38,9 @@ class YoutubeStat(Stat):
         return str(tuple) 
 
 class YoutubeFSInode:
-    def __init__(self,path,mode,id,ctime,mtime):
+    def __init__(self,path,mode,id,ctime,mtime,stat=YoutubeStat()):
         self.path           =   str(path)
-        self.stat           =   YoutubeStat()
+        self.stat           =   stat 
         self.stat.mode      =   int(mode)
         self.stat.st_ino    =   str(id)
         self.stat.st_ctime  =   ctime
@@ -57,10 +57,8 @@ class YoutubeFSInode:
         self.children.append(inode)
 
     def __str__(self):
-        rstr = ("\nYoutubeFSInode\npath = %s\nmode = %s\n" + \
-                "id = %s\nctime = %s\nmtime = %s\n") % (self.path,\
-                str(self.stat.mode),self.stat.st_ino,\
-                str(self.stat.st_ctime),str(self.stat.st_mtime))
+        rstr = ("\nYoutubeFSInode\npath = %s\nstat = %s\n") % \
+                (self.path,str(self.stat))
         return rstr
 
 """
@@ -83,7 +81,7 @@ class YoutubeFSInodeCache:
         return None 
 
     def __str__(self):
-        str = "YoutubeInodeCache: Printing cache\n"
+        rstr = "YoutubeInodeCache: Printing cache\n"
         for k,v in self.cache.iteritems():
-            str = str + ("%s\n" % k)       
-        return str            
+            rstr = rstr + ("%s\n" % k)       
+        return rstr            
