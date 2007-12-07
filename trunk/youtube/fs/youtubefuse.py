@@ -39,7 +39,7 @@ class YoutubeFUSE(Fuse):
     def getattr(self, path):
         logging.debug("YoutubeFUSE getattr for " + path)
         inode = self.inodeCache.getInode(path)
-        logging.debug("YoutubeFUSE new getattr for %s is %s",\
+        logging.info("YoutubeFUSE new getattr for %s is %s",\
                 inode.path,str(inode.stat))
         return inode.stat 
 
@@ -202,7 +202,7 @@ class YoutubeFUSE(Fuse):
             self.__addFavouritesInode()
             self.__addPlaylistInodes()       
             
-            print str(self.inodeCache) 
+            self.inodeCache.printCache() 
         except Exception,inst:
             logging.debug("YoutubeFUSE createfs exception : " + str(inst))
 
