@@ -7,6 +7,7 @@ import logging
 import os, sys
 import fcntl
 import stat
+import time
 try:
     import _find_fuse_parts
 except ImportError:
@@ -27,6 +28,7 @@ class YoutubeFUSE(Fuse):
         Fuse.__init__(self, *args, **kw)
         self.root = '/'
         self.youtubeUser = None
+        self.inodeCache  =  YoutubeFSInodeCache()
         logging.debug("YoutubeFUSE init complete")
 
     def open(self,path,flags):
@@ -36,14 +38,11 @@ class YoutubeFUSE(Fuse):
 
     def getattr(self, path):
         attr = os.lstat("." + path)
-        logging.debug("YoutubeFUSE getattr " + path + " " +\
-                            str(attr))
-
         inode = self.inodeCache.getInode(path)
+        logging.debug("YoutubeFUSE getattr for " + path)
         logging.debug("YoutubeFUSE old getattr " + str(attr) +\
             " " + str(type(attr)))
         logging.debug("YoutubeFUSE new getattr " + str(inode.stat))
-        print self.inodeCache
         return inode.stat 
 
     def readlink(self, path):
@@ -152,7 +151,8 @@ class YoutubeFUSE(Fuse):
             # Added the root directory inode
             #
             mode = stat.S_IFDIR | 0755
-            rootDirInode = YoutubeFSInode('/',mode,0,0,0)  
+            rootDirInode = YoutubeFSInode('/',mode,0,\
+                long(time.time()),long(time.time())) 
             self.inodeCache.addInode(rootDirInode)
 
     def __addProfileInode(self):
@@ -197,7 +197,6 @@ class YoutubeFUSE(Fuse):
     def createfs(self):
         try:
             logging.debug("YoutubeFUSE createfs")
-            self.inodeCache = YoutubeFSInodeCache()
             self.youtubeUser = YoutubeUser(self.username)
 
             self.__addRootInode()
@@ -205,7 +204,7 @@ class YoutubeFUSE(Fuse):
             self.__addFavouritesInode()
             self.__addPlaylistInodes()       
             
-            print self.inodeCache 
+            print str(self.inodeCache) 
         except Exception,inst:
             logging.debug("YoutubeFUSE createfs exception : " + str(inst))
 
