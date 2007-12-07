@@ -37,12 +37,10 @@ class YoutubeFUSE(Fuse):
         return file 
 
     def getattr(self, path):
-        attr = os.lstat("." + path)
-        inode = self.inodeCache.getInode(path)
         logging.debug("YoutubeFUSE getattr for " + path)
-        logging.debug("YoutubeFUSE old getattr " + str(attr) +\
-            " " + str(type(attr)))
-        logging.debug("YoutubeFUSE new getattr " + str(inode.stat))
+        inode = self.inodeCache.getInode(path)
+        logging.debug("YoutubeFUSE new getattr for %s is %s",\
+                inode.path,str(inode.stat))
         return inode.stat 
 
     def readlink(self, path):
@@ -200,9 +198,9 @@ class YoutubeFUSE(Fuse):
             self.youtubeUser = YoutubeUser(self.username)
 
             self.__addRootInode()
-#            self.__addProfileInode()     
-#            self.__addFavouritesInode()
-#            self.__addPlaylistInodes()       
+            self.__addProfileInode()     
+            self.__addFavouritesInode()
+            self.__addPlaylistInodes()       
             
             print str(self.inodeCache) 
         except Exception,inst:
