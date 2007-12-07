@@ -23,6 +23,9 @@ from youtube.fs.fsobjects import YoutubeStat
 from youtube.fs.fsobjects import YoutubeFSInodeCache
 from youtube.fs.fsobjects import YoutubeFSInode
 
+hello_path = '/hello'
+hello_str = 'Hello World!\n'
+
 class YoutubeFUSE(Fuse):
     def __init__(self, *args, **kw):
         Fuse.__init__(self, *args, **kw)
@@ -39,105 +42,14 @@ class YoutubeFUSE(Fuse):
     def getattr(self, path):
         logging.debug("YoutubeFUSE getattr for " + path)
         inode = self.inodeCache.getInode(path)
-        logging.info("YoutubeFUSE new getattr for %s is %s",\
-                inode.path,str(inode.stat))
+        logging.debug("YoutubeFUSE new getattr for %s is %s and type %s",\
+                inode.path,str(inode),type(inode.stat))
         return inode.stat 
 
-    def readlink(self, path):
-        logging.debug("YoutubeFUSE readlink " + path)
-        return os.readlink("." + path)
-
     def readdir(self, path, offset):
-        logging.debug("YoutubeFUSE readdir " + path + \
-                + " " + str(offset))
-
-        dirInode = self.inodeCache.getInode(self.path)
+        dirInode = self.inodeCache.getInode(path)
         for entry in dirInode.children:
-            log.debug("YoutubeFUSE readdir returning subdir " + \
-                        entry)
-            yield fuse.fuseDirentry(entry.path.strip('/').encode('ascii'))
-
-    def unlink(self, path):
-        logging.debug("YoutubeFUSE unlink " + path)
-        os.unlink("." + path)
-
-    def rmdir(self, path):
-        logging.debug("YoutubeFUSE rmdir " + path)
-        os.rmdir("." + path)
-
-    def symlink(self, path, path1):
-        logging.debug("YoutubeFUSE symlink " + path\
-            + " " + path1)
-        os.symlink(path, "." + path1)
-
-    def rename(self, path, path1):
-        logging.debug("YoutubeFUSE rename " + path\
-            + " " + path1)
-        os.rename("." + path, "." + path1)
-
-    def link(self, path, path1):
-        logging.debug("YoutubeFUSE link " + path\
-            + " " + path1)
-        os.link("." + path, "." + path1)
-
-    def chmod(self, path, mode):
-        logging.debug("YoutubeFUSE chmod " + path
-            + " " + str(mode))
-        os.chmod("." + path, mode)
-
-    def chown(self, path, user, group):
-        logging.debug("YoutubeFUSE chown " + path\
-            + " " + user + " " + group)
-        os.chown("." + path, user, group)
-
-    def truncate(self, path, len):
-        logging.debug("YoutubeFUSE truncate " +\
-            path + " " + str(len))
-        f = open("." + path, "a")
-        f.truncate(len)
-        f.close()
-
-    def mknod(self, path, mode, dev):
-        logging.debug("YoutubeFUSE mknode" +\
-        path + " " + str(mode) + " " + str(dev))
-        os.mknod("." + path, mode, dev)
-
-    def mkdir(self, path, mode):
-        logging.debug("YoutubeFUSE mkdir " +\
-            path + " " + str(mode)) 
-        os.mkdir("." + path, mode)
-
-    def utime(self, path, times):
-        logging.debug("YoutubeFUSE utime " + path +\
-            " " + str(times))
-        os.utime("." + path, times)
-
-    def access(self, path, mode):
-        logging.debug("YoutubeFUSE access " + path +\
-            " " + str(mode))
-        if not os.access("." + path, mode):
-            return -EACCES
-
-    def statfs(self):
-        """
-        Should return an object with statvfs attributes (f_bsize, f_frsize...).
-        Eg., the return value of os.statvfs() is such a thing (since py 2.2).
-        If you are not reusing an existing statvfs object, start with
-        fuse.StatVFS(), and define the attributes.
-
-        To provide usable information (ie., you want sensible df(1)
-        output, you are suggested to specify the following attributes:
-
-            - f_bsize - preferred size of file blocks, in bytes
-            - f_frsize - fundamental size of file blcoks, in bytes
-                [if you have no idea, use the same as blocksize]
-            - f_blocks - total number of blocks in the filesystem
-            - f_bfree - number of free blocks
-            - f_files - total number of file inodes
-            - f_ffree - nunber of free file inodes
-        """
-        logging.debug("YoutubeFUSE statfs")
-        return os.statvfs(".")
+            yield fuse.Direntry(entry.path.strip('/').encode('ascii'))
 
     def fsinit(self):
         logging.debug("YoutubeFUSE fsinit " + self.username)
@@ -145,49 +57,49 @@ class YoutubeFUSE(Fuse):
         os.chdir(self.root)
 
     def __addRootInode(self):
-            #
-            # Added the root directory inode
-            #
-            mode = stat.S_IFDIR | 0755
-            rootDirInode = YoutubeFSInode('/',mode,0,\
-                long(time.time()),long(time.time())) 
-            self.inodeCache.addInode(rootDirInode)
+        #
+        # Added the root directory inode
+        #
+        mode = stat.S_IFDIR | 0755
+        rootDirInode = YoutubeFSInode('/',mode,0,\
+            long(time.time()),long(time.time())) 
+        self.inodeCache.addInode(rootDirInode)
 
     def __addProfileInode(self):
-            #
-            # Add the profile file
-            #
-            profile = self.youtubeUser.getProfile()
-            mode = stat.S_IFREG | 0444
-            profileInode = YoutubeFSInode('/profile',mode,\
-                    0,profile.ctime,profile.mtime)
-            profileInode.ctime  = profile.ctime
-            profileInode.mtime  = profile.mtime
-            profileInode.data   = profile.getData()
-            self.inodeCache.addInode(profileInode) 
-            rootDirInode = self.inodeCache.getInode('/')
-            rootDirInode.addChildInode(profileInode)
+        #
+        # Add the profile file
+        #
+        profile = self.youtubeUser.getProfile()
+        mode = stat.S_IFREG | 0444
+        profileInode = YoutubeFSInode('/profile',mode,\
+                0,profile.ctime,profile.mtime)
+        profileInode.ctime  = profile.ctime
+        profileInode.mtime  = profile.mtime
+        profileInode.data   = profile.getData()
+        self.inodeCache.addInode(profileInode) 
+        rootDirInode = self.inodeCache.getInode('/')
+        rootDirInode.addChildInode(profileInode)
 
     def __addFavouritesInode(self):
-            #
-            # Get the favourite videos
-            # 
-            favourities = self.youtubeUser.getFavourities()
-            mode = stat.S_IFDIR | 0755
-            favouritesInode = YoutubeFSInode('/favourites',mode,\
-                    0,favourities.ctime,favourities.mtime)
-            self.inodeCache.addInode(favouritesInode) 
-            rootDirInode = self.inodeCache.getInode('/')
-            rootDirInode.addChildInode(favouritesInode)
+        #
+        # Get the favourite videos
+        # 
+        favourities = self.youtubeUser.getFavourities()
+        mode = stat.S_IFDIR | 0755
+        favouritesInode = YoutubeFSInode('/favourites',mode,\
+                0,favourities.ctime,favourities.mtime)
+        self.inodeCache.addInode(favouritesInode) 
+        rootDirInode = self.inodeCache.getInode('/')
+        rootDirInode.addChildInode(favouritesInode)
         
-            for video in favourities.getVideos():
-                mode = stat.S_IFREG | 0444
-                path = ("/favourites/%s") % video.title
-                videoInode =  YoutubeFSInode(path,mode,\
-                            video.id,video.ctime,video.mtime)
-                videoInode.data = video.getContents()
-                self.inodeCache.addInode(videoInode) 
-                favouritesInode.addChildInode(videoInode)
+        for video in favourities.getVideos():
+            mode = stat.S_IFREG | 0444
+            path = ("/favourites/%s") % video.title
+            videoInode =  YoutubeFSInode(path,mode,\
+                        video.id,video.ctime,video.mtime)
+            videoInode.data = video.getContents()
+            self.inodeCache.addInode(videoInode) 
+            favouritesInode.addChildInode(videoInode)
 
     def __addPlaylistInodes(self):
         pass
@@ -202,7 +114,6 @@ class YoutubeFUSE(Fuse):
             self.__addFavouritesInode()
             self.__addPlaylistInodes()       
             
-            self.inodeCache.printCache() 
         except Exception,inst:
             logging.debug("YoutubeFUSE createfs exception : " + str(inst))
 
