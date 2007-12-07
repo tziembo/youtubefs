@@ -37,9 +37,9 @@ class YoutubeStat(Stat):
 class YoutubeFSInode:
     def __init__(self,path,mode,id,ctime,mtime,stat=YoutubeStat()):
         self.path           =   str(path)
-        self.stat           =   stat 
+        self.stat           =   YoutubeStat()
         self.stat.st_mode   =   int(mode)
-        self.stat.st_ino    =   str(id)
+        self.stat.st_ino    =   id
         self.stat.st_ctime  =   ctime
         self.stat.st_mtime  =   mtime
         self.data           = ""
@@ -77,6 +77,11 @@ class YoutubeFSInodeCache:
             return self.cache[path]
 
         return None 
+
+    def printCache(self):
+         for k,v in self.cache.iteritems():
+            rstr = "%s,%s\n" % (k,v)       
+            logging.info(rstr)
 
     def __str__(self):
         rstr = "YoutubeInodeCache: Printing cache\n"
