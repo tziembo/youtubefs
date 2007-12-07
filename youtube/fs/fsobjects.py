@@ -41,7 +41,7 @@ class YoutubeFSInode:
     def __init__(self,path,mode,id,ctime,mtime,stat=YoutubeStat()):
         self.path           =   str(path)
         self.stat           =   stat 
-        self.stat.mode      =   int(mode)
+        self.stat.st_mode   =   int(mode)
         self.stat.st_ino    =   str(id)
         self.stat.st_ctime  =   ctime
         self.stat.st_mtime  =   mtime
@@ -50,7 +50,7 @@ class YoutubeFSInode:
 
         logging.debug("\nYoutubeFSInode init\npath = %s\nmode = %s\n" + \
                 "id = %s\nctime = %s\nmtime = %s\n",self.path,\
-                str(self.stat.mode),self.stat.st_ino,\
+                str(self.stat.st_mode),self.stat.st_ino,\
                 str(self.stat.st_ctime),str(self.stat.st_mtime))
 
     def addChildInode(self,inode):

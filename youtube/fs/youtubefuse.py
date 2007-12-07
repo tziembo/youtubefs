@@ -200,9 +200,9 @@ class YoutubeFUSE(Fuse):
             self.youtubeUser = YoutubeUser(self.username)
 
             self.__addRootInode()
-            self.__addProfileInode()     
-            self.__addFavouritesInode()
-            self.__addPlaylistInodes()       
+#            self.__addProfileInode()     
+#            self.__addFavouritesInode()
+#            self.__addPlaylistInodes()       
             
             print str(self.inodeCache) 
         except Exception,inst:
