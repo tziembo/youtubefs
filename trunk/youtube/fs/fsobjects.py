@@ -9,6 +9,7 @@ from fuse import Direntry
 from youtube.api.protocol import YoutubeVideo
 from youtube.api.protocol import YoutubePlaylist
 from youtube.api.protocol import YoutubeUser
+from youtube.fs import YoutubeInodeCounter 
 import time
 import os
 import stat
@@ -35,6 +36,7 @@ class YoutubeStat(Stat):
         return str(tuple) 
 
 class YoutubeFSInode:
+
     def __init__(self,path,mode,id,ctime,mtime,stat=YoutubeStat()):
         self.path           =   str(path)
         if self.path == "/":
@@ -45,10 +47,11 @@ class YoutubeFSInode:
   
         self.stat           =   YoutubeStat()
         self.stat.st_mode   =   int(mode)
-        self.stat.st_ino    =   id
+        self.stat.st_ino    =   YoutubeInodeCounter.next() 
         self.stat.st_ctime  =   ctime
         self.stat.st_mtime  =   mtime
         self.data           = ""
+        self.id             = id
         self.children       = []
 
         logging.debug("\nYoutubeFSInode init\npath = %s" +
@@ -63,8 +66,8 @@ class YoutubeFSInode:
 
     def __str__(self):
         rstr = ("\nYoutubeFSInode\npath = %s\ndirentry = %s\n"+\
-                "stat = %s\n") % \
-                (self.direntry,self.path,str(self.stat))
+                "id = %s\nstat = %s\n") % \
+                (self.direntry,self.path,self.id,str(self.stat))
         return rstr
 
 """
