@@ -35,21 +35,21 @@ class YoutubeFUSE(Fuse):
         logging.debug("YoutubeFUSE init complete")
 
     def open(self,path,flags):
-        logging.debug("YoutubeFUSE open called")
-        file = self.YoutubeFUSEFile(path,0,0)
-        return file 
+        logging.debug("YoutubeFUSE open called on %s",path)
 
     def getattr(self, path):
-        logging.debug("YoutubeFUSE getattr for " + path)
+        logging.debug("YoutubeFUSE getattr for %s",path)
         inode = self.inodeCache.getInode(path)
-        logging.debug("YoutubeFUSE new getattr for %s is %s and type %s",\
+        if inode == None:
+            return None
+        logging.debug("YoutubeFUSE getattr for %s is %s and type %s",\
                 inode.path,str(inode),type(inode.stat))
         return inode.stat 
 
     def readdir(self, path, offset):
         dirInode = self.inodeCache.getInode(path)
         for entry in dirInode.children:
-            yield fuse.Direntry(entry.path.strip('/').encode('ascii'))
+            yield fuse.Direntry(entry.direntry.strip('/').encode('ascii'))
 
     def fsinit(self):
         logging.debug("YoutubeFUSE fsinit " + self.username)
@@ -113,7 +113,9 @@ class YoutubeFUSE(Fuse):
             self.__addProfileInode()     
             self.__addFavouritesInode()
             self.__addPlaylistInodes()       
-            
+           
+            self.inodeCache.printCache()
+ 
         except Exception,inst:
             logging.debug("YoutubeFUSE createfs exception : " + str(inst))
 

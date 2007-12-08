@@ -37,6 +37,12 @@ class YoutubeStat(Stat):
 class YoutubeFSInode:
     def __init__(self,path,mode,id,ctime,mtime,stat=YoutubeStat()):
         self.path           =   str(path)
+        if self.path == "/":
+            self.direntry = "/"
+        else:
+            elements        = self.path.split('/')
+            self.direntry   = elements[len(elements) - 1]
+  
         self.stat           =   YoutubeStat()
         self.stat.st_mode   =   int(mode)
         self.stat.st_ino    =   id
@@ -45,9 +51,10 @@ class YoutubeFSInode:
         self.data           = ""
         self.children       = []
 
-        logging.debug("\nYoutubeFSInode init\npath = %s\nmode = %s\n" + \
+        logging.debug("\nYoutubeFSInode init\npath = %s" +
+                    "\ndirentry = %s\nmode = %s\n" + \
                 "id = %s\nctime = %s\nmtime = %s\n",self.path,\
-                str(self.stat.st_mode),self.stat.st_ino,\
+                self.direntry,str(self.stat.st_mode),self.stat.st_ino,\
                 str(self.stat.st_ctime),str(self.stat.st_mtime))
 
     def addChildInode(self,inode):
@@ -55,8 +62,9 @@ class YoutubeFSInode:
         self.children.append(inode)
 
     def __str__(self):
-        rstr = ("\nYoutubeFSInode\npath = %s\nstat = %s\n") % \
-                (self.path,str(self.stat))
+        rstr = ("\nYoutubeFSInode\npath = %s\ndirentry = %s\n"+\
+                "stat = %s\n") % \
+                (self.direntry,self.path,str(self.stat))
         return rstr
 
 """
