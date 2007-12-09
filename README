@@ -1,0 +1,2 @@
+sudo adduser whoami fuse
+sudo chgrp fuse /dev/fuse
