@@ -23,16 +23,17 @@ class YoutubeProfile:
         self.location   = "" 
 
     def getData(self):
-        data =   ("Username   = %s\n" +\
-                "Gender     = %s\n" +\
-                "Age        = %s\n" +\
-                "Location   = %s\n" +\
-                "Ctime      = %s\n" +\
-                "Mtime      = %s\n") %\
+        data =   (\
+                "Username       = %s\n" +\
+                "Gender         = %s\n" +\
+                "Age            = %s\n" +\
+                "Location       = %s\n" +\
+                "Published time = %s\n" +\
+                "Updated time   = %s\n") %\
         (self.username,self.gender,self.age,self.location,\
             str(self.ctime),str(self.mtime))
 
-        return data 
+        return data.encode('ascii')
 
     def __str__(self):
         return self.getData()       
