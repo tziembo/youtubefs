@@ -51,7 +51,7 @@ class YoutubePlaylist:
    
     def getVideos(self):
         videos = []
-        logging.debug(self.url)
+        logging.debug("YoutubePlaylist getting videos from %s", self.url)
 
         try:
             urlObj = urllib2.urlopen(self.url)
@@ -71,9 +71,10 @@ class YoutubePlaylist:
                     (entry.getElementsByTagName('title')[0]).firstChild.data
                 logging.debug("Video title: " + video.title)
 
-                video.ctime = \
-                    gdataTime2UnixTime((entry.getElementsByTagName('published')[0]).firstChild.data)
-                logging.debug("Video ctime: " + str(video.ctime))
+                if entry.hasAttribute('published'):
+                    video.ctime = \
+                        gdataTime2UnixTime((entry.getElementsByTagName('published')[0]).firstChild.data)
+                    logging.debug("Video ctime: " + str(video.ctime))
 
                 video.mtime = \
                     gdataTime2UnixTime((entry.getElementsByTagName('updated')[0]).firstChild.data)
@@ -89,9 +90,9 @@ class YoutubePlaylist:
                     video.type  =  mediaContent[0].getAttribute('type')
                 
                 videos.append(video)
-        except:
-            logging.critical("Invalid video XML format " + \
-                        str(sys.exc_info()[0]))
+        except Exception,inst:
+            logging.critical("Invalid video XML format: " + \
+                        str(inst))
         return videos
 
 class YoutubeVideo:
@@ -125,7 +126,7 @@ class YoutubeUser:
         
         playlists = []
         url = youtube.api.PLAYLISTS_URI % (self.__username__)
-        logging.debug(url)
+        logging.debug("YoutubeUser getting playlists from %s",url)
 
         try:
             urlObj = urllib2.urlopen(url)
@@ -226,8 +227,8 @@ if __name__ == "__main__":
 #    for video in favourities:
 #        print video
 #
-#    playlists = youtubeUser.getPlaylists()
-#    for playlist in playlists:
-#        playlist.getVideos()
+    playlists = youtubeUser.getPlaylists()
+    for playlist in playlists:
+        playlist.getVideos()
 
  
