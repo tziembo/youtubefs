@@ -5,6 +5,7 @@ __license__     = "MIT"
 
 import logging
 import threading
+import re
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -26,4 +27,3 @@ class counter:
         return i
 
 YoutubeInodeCounter = counter(0,1)
-
