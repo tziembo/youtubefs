@@ -10,7 +10,6 @@ from youtube.api.protocol import YoutubeVideo
 from youtube.api.protocol import YoutubePlaylist
 from youtube.api.protocol import YoutubeUser
 from youtube.fs import YoutubeInodeCounter
-from youtube.fs import spaceregex 
 import time
 import os
 import stat
