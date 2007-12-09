@@ -35,8 +35,30 @@ class YoutubeFUSE(Fuse):
         logging.debug("YoutubeFUSE init complete")
 
     def open(self,path,flags):
-        logging.debug("YoutubeFUSE open called on %s",path)
+        logging.debug("YoutubeFUSE open called on %s with flags %s",\
+                path,str(flags))
+        if (flags & 3) != os.O_RDONLY:
+            logging.info("YoutubeFUSE open error for %s with flags %s",\
+                path,str(flags))
+            return -errno.EACCES
+        return 0
 
+    def read(self,path,size,offset):
+        logging.debug("YoutubeFUSE read for %s with size %s offset %s",\
+                path,str(size),str(offset))
+        inode = self.inodeCache.getInode(path)
+        logging.debug("YoutubeFUSE read inode data for %s is %s,%d",path,\
+                inode.data,len(inode.data))
+        slen = len(inode.data)
+        if offset < slen:
+            if (offset+size)>slen:
+                size = slen-offset
+            buf = inode.data[offset:offset+size]
+        else:
+            buf = ''
+        logging.debug("YoutubeFUSE read returning buf %s",buf) 
+        return buf
+ 
     def getattr(self, path):
         logging.debug("YoutubeFUSE getattr for %s",path)
         inode = self.inodeCache.getInode(path)
@@ -75,7 +97,7 @@ class YoutubeFUSE(Fuse):
                 0,profile.ctime,profile.mtime)
         profileInode.ctime  = profile.ctime
         profileInode.mtime  = profile.mtime
-        profileInode.data   = profile.getData()
+        profileInode.setData(profile.getData())
         self.inodeCache.addInode(profileInode) 
         rootDirInode = self.inodeCache.getInode('/')
         rootDirInode.addChildInode(profileInode)
@@ -97,7 +119,7 @@ class YoutubeFUSE(Fuse):
             path = ("/favourites/%s") % video.title
             videoInode =  YoutubeFSInode(path,mode,\
                         video.id,video.ctime,video.mtime)
-            videoInode.data = video.getContents()
+            videoInode.setData(video.getContents())
             self.inodeCache.addInode(videoInode) 
             favouritesInode.addChildInode(videoInode)
 

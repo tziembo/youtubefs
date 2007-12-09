@@ -9,11 +9,13 @@ from fuse import Direntry
 from youtube.api.protocol import YoutubeVideo
 from youtube.api.protocol import YoutubePlaylist
 from youtube.api.protocol import YoutubeUser
-from youtube.fs import YoutubeInodeCounter 
+from youtube.fs import YoutubeInodeCounter
+from youtube.fs import spaceregex 
 import time
 import os
 import stat
 import logging
+import re
 
 class YoutubeStat(Stat):
     def __init__(self):
@@ -64,6 +66,11 @@ class YoutubeFSInode:
         self.stat.st_nlink = self.stat.st_nlink + 1
         self.children.append(inode)
 
+    def setData(self,data):
+        logging.debug("\nYoutubeFSInode setting data as %s",str(data))
+        self.data = data 
+        self.stat.st_size = len(self.data)
+
     def __str__(self):
         rstr = ("\nYoutubeFSInode\npath = %s\ndirentry = %s\n"+\
                 "id = %s\nstat = %s\n") % \
@@ -86,7 +93,6 @@ class YoutubeFSInodeCache:
         logging.debug("YoutubeFSInodeCache getInode for " + path)
         if self.cache.has_key(path):
             return self.cache[path]
-
         return None 
 
     def printCache(self):
