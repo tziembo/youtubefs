@@ -27,3 +27,5 @@ class counter:
         return i
 
 YoutubeInodeCounter = counter(0,1)
+
+VIDEO_FILE_EXTENSION = "htm"

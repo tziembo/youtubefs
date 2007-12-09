@@ -22,6 +22,7 @@ from youtube.api import gdataTime2UnixTime
 from youtube.fs.fsobjects import YoutubeStat
 from youtube.fs.fsobjects import YoutubeFSInodeCache
 from youtube.fs.fsobjects import YoutubeFSInode
+import youtube.fs
 
 hello_path = '/hello'
 hello_str = 'Hello World!\n'
@@ -116,7 +117,8 @@ class YoutubeFUSE(Fuse):
         
         for video in favourities.getVideos():
             mode = stat.S_IFREG | 0444
-            path = ("/favourites/%s") % video.title
+            path = ("/favourites/%s.%s") % (video.title,\
+                        youtube.fs.VIDEO_FILE_EXTENSION)
             videoInode =  YoutubeFSInode(path,mode,\
                         video.id,video.ctime,video.mtime)
             videoInode.setData(video.getContents())
