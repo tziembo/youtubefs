@@ -135,7 +135,30 @@ class YoutubeFUSE(Fuse):
         self.inodeCache.addInode(playlistsDirInode)
         rootDirInode = self.inodeCache.getInode('/')
         rootDirInode.addChildInode(playlistsDirInode)
-            
+        
+        playlists = self.youtubeUser.getPlaylists()
+        for playlist in playlists:
+            plPath = "/playlists/%s" % (playlist.title) 
+            logging.debug("YoutubeFUSE adding playlist %s",plPath)
+            mode = stat.S_IFDIR | 0755
+            playlistInode = YoutubeFSInode(plPath,mode,\
+                0,playlist.ctime,playlist.mtime)
+            self.inodeCache.addInode(playlistInode) 
+            playlistsDirInode.addChildInode(playlistInode)
+   
+            for video in playlist.getVideos():
+                logging.debug("YoutubeFUSE trying to added a video")
+                mode = stat.S_IFREG | 0444
+                path = ("%s/%s.%s") % (plPath,video.title,\
+                        youtube.fs.VIDEO_FILE_EXTENSION)
+                logging.debug("YoutubeFUSE adding video %s",path)
+                videoInode =  YoutubeFSInode(path,mode,\
+                        video.id,video.ctime,video.mtime)
+                videoInode.setData(video.getContents())
+                self.inodeCache.addInode(videoInode) 
+                playlistInode.addChildInode(videoInode)
+   
+ 
     def createfs(self):
         try:
             logging.debug("YoutubeFUSE createfs")
