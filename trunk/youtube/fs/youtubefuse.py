@@ -126,7 +126,15 @@ class YoutubeFUSE(Fuse):
             favouritesInode.addChildInode(videoInode)
 
     def __addPlaylistInodes(self):
-        pass
+        #
+        # Added the playlists directory inode
+        #
+        mode = stat.S_IFDIR | 0755
+        playlistsDirInode = YoutubeFSInode('/playlists',mode,0,\
+            long(time.time()),long(time.time())) 
+        self.inodeCache.addInode(playlistsDirInode)
+        rootDirInode = self.inodeCache.getInode('/')
+        rootDirInode.addChildInode(playlistsDirInode)
             
     def createfs(self):
         try:
