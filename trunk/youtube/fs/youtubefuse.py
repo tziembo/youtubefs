@@ -157,7 +157,19 @@ class YoutubeFUSE(Fuse):
                 videoInode.setData(video.getContents())
                 self.inodeCache.addInode(videoInode) 
                 playlistInode.addChildInode(videoInode)
-   
+
+    def __addSubscriptionInodes(self):
+        #
+        # Added the subscription directory inode
+        #
+        logging.debug("YoutubeFUSE trying to add subscription inode") 
+        mode = stat.S_IFDIR | 0755
+        subscriptionsDirInode = YoutubeFSInode('/subscriptions',mode,0,\
+            long(time.time()),long(time.time())) 
+        self.inodeCache.addInode(subscriptionsDirInode)
+        rootDirInode = self.inodeCache.getInode('/')
+        rootDirInode.addChildInode(subscriptionsDirInode)
+
  
     def createfs(self):
         try:
@@ -168,8 +180,7 @@ class YoutubeFUSE(Fuse):
             self.__addProfileInode()     
             self.__addFavouritesInode()
             self.__addPlaylistInodes()       
-           
-            self.inodeCache.printCache()
+            self.__addSubscriptionInodes()  
  
         except Exception,inst:
             logging.debug("YoutubeFUSE createfs exception : " + str(inst))
