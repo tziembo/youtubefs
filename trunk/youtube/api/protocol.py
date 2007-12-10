@@ -38,6 +38,7 @@ class YoutubeProfile:
     def __str__(self):
         return self.getData()       
 
+
 class YoutubePlaylist:
     def __init__(self,id):
         self.id = id
@@ -117,10 +118,58 @@ class YoutubeVideo:
             self.url   
         return str
             
+class YoutubeSubscription(YoutubePlaylist):
+    def __init__(self,id):
+        self.id = id
+        self.title = ""  
+        self.ctime = long(time.time())
+        self.mtime = long(time.time())
 
 class YoutubeUser:
     def __init__(self,username):
         self.__username__ = username
+
+    def getSubscriptions(self):
+        subscriptions = []
+        url = youtube.api.SUBSCRIPTIONS_URI % (self.__username__)
+        logging.debug("YoutubeUser getting subscriptions from %s",url)
+
+        try:
+            urlObj = urllib2.urlopen(url)
+            data   = urlObj.read()
+        except Exception,inst:
+            logging.critical("Unable to open " + url)
+            logging.critical(str(inst))
+
+        dom = xml.dom.minidom.parseString(data)
+        try:
+            for entry in dom.getElementsByTagName('entry'):
+                id = (entry.getElementsByTagName('id')[0]).firstChild.data
+                sub = YoutubeSubscription(id)
+                sub.title =  \
+                    (entry.getElementsByTagName('title')[0]).firstChild.data
+                logging.debug("Subscription title: " + sub.title)
+
+                sub.ctime = \
+                    gdataTime2UnixTime((entry.getElementsByTagName('published')[0]).firstChild.data)
+                logging.debug("Subscription ctime: " + str(sub.ctime))
+
+                sub.mtime = \
+                   gdataTime2UnixTime((entry.getElementsByTagName('updated')[0]).firstChild.data)
+                logging.debug("Subscription mtime: " + str(sub.mtime))
+                subscriptions.append(sub)
+
+                feedLink = entry.getElementsByTagName('gd:feedLink')
+                if feedLink:
+                    sub.url = feedLink[0].getAttribute('href')
+                    logging.debug("Subscription url " + str(sub.url))                
+                subscriptions.append(sub)
+        except Exception, inst:            
+            logging.critical("Invalid subscription XML format " + \
+                        str(inst))
+
+        return subscriptions
+
 
     def getPlaylists(self):
         
@@ -131,8 +180,9 @@ class YoutubeUser:
         try:
             urlObj = urllib2.urlopen(url)
             data   = urlObj.read()
-        except:
+        except Exception,inst:
             logging.critical("Unable to open " + url)
+            logging.critical(str(inst))
 
         dom = xml.dom.minidom.parseString(data)
         try:
@@ -153,9 +203,9 @@ class YoutubeUser:
                    gdataTime2UnixTime((entry.getElementsByTagName('updated')[0]).firstChild.data)
                 logging.debug("Playlist mtime: " + str(pl.mtime))
                 playlists.append(pl)
-        except:            
+        except Exception, inst:            
             logging.critical("Invalid playlist XML format " + \
-                        str(sys.exc_info()[0]))
+                        str(inst))
 
         return playlists        
 
@@ -171,9 +221,6 @@ class YoutubeUser:
         favourities.url = url
         return favourities 
     
-    def getSubscriptions(self):
-        pass
-
     def getProfile(self):
         url = youtube.api.PROFILE_URI % (self.__username__)
         logging.debug(url)
@@ -223,12 +270,13 @@ if __name__ == "__main__":
 
     youtubeUser = YoutubeUser(sys.argv[1])
     print youtubeUser.getProfile()
+    youtubeUser.getSubscriptions()
 #    favourities = youtubeUser.getFavourities()
 #    for video in favourities:
 #        print video
 #
-    playlists = youtubeUser.getPlaylists()
-    for playlist in playlists:
-        playlist.getVideos()
+#    playlists = youtubeUser.getPlaylists()
+#    for playlist in playlists:
+#        playlist.getVideos()
 
  

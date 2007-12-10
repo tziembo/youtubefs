@@ -8,6 +8,7 @@ import os, sys
 import fcntl
 import stat
 import time
+import re
 try:
     import _find_fuse_parts
 except ImportError:
@@ -125,20 +126,10 @@ class YoutubeFUSE(Fuse):
             self.inodeCache.addInode(videoInode) 
             favouritesInode.addChildInode(videoInode)
 
-    def __addPlaylistInodes(self):
-        #
-        # Added the playlists directory inode
-        #
-        mode = stat.S_IFDIR | 0755
-        playlistsDirInode = YoutubeFSInode('/playlists',mode,0,\
-            long(time.time()),long(time.time())) 
-        self.inodeCache.addInode(playlistsDirInode)
-        rootDirInode = self.inodeCache.getInode('/')
-        rootDirInode.addChildInode(playlistsDirInode)
-        
-        playlists = self.youtubeUser.getPlaylists()
+    def __addPlaylists(self,parent,playlists):
         for playlist in playlists:
-            plPath = "/playlists/%s" % (playlist.title) 
+            playlistsDirInode = self.inodeCache.getInode(parent)
+            plPath = "%s/%s" % (parent,playlist.title) 
             logging.debug("YoutubeFUSE adding playlist %s",plPath)
             mode = stat.S_IFDIR | 0755
             playlistInode = YoutubeFSInode(plPath,mode,\
@@ -158,17 +149,32 @@ class YoutubeFUSE(Fuse):
                 self.inodeCache.addInode(videoInode) 
                 playlistInode.addChildInode(videoInode)
 
+    def __addSubDir(self,parent,dir):
+        regex = re.compile('//')
+        mode = stat.S_IFDIR | 0755
+        dirPath = "%s/%s" % (parent,dir)
+        dirPath = regex.sub('/',dirPath)
+        logging.debug("YoutubeFUSE adding subdir %s",dirPath)
+        dirInode = YoutubeFSInode(dirPath,mode,0,\
+            long(time.time()),long(time.time())) 
+        self.inodeCache.addInode(dirInode)
+        rootDirInode = self.inodeCache.getInode(parent)
+        rootDirInode.addChildInode(dirInode)
+
+    def __addPlaylistInodes(self):
+        #
+        # Added the playlists directory inode
+        #
+        self.__addSubDir('/','playlists')       
+        self.__addPlaylists('/playlists',self.youtubeUser.getPlaylists())
+
     def __addSubscriptionInodes(self):
         #
         # Added the subscription directory inode
         #
-        logging.debug("YoutubeFUSE trying to add subscription inode") 
-        mode = stat.S_IFDIR | 0755
-        subscriptionsDirInode = YoutubeFSInode('/subscriptions',mode,0,\
-            long(time.time()),long(time.time())) 
-        self.inodeCache.addInode(subscriptionsDirInode)
-        rootDirInode = self.inodeCache.getInode('/')
-        rootDirInode.addChildInode(subscriptionsDirInode)
+        self.__addSubDir('/','subscriptions')       
+        self.__addPlaylists('/subscriptions',\
+                        self.youtubeUser.getSubscriptions())
 
  
     def createfs(self):
