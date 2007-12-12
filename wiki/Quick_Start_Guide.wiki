@@ -5,6 +5,13 @@
    * fuse client library (libfuse2)
    * python-fuse 
 
+=== Configuring fuse ===
+Once fuse is installed please perform the following steps
+   * sudo adduser *username* fuse
+   * sudo chgrp fuse /dev/fuse
+
+where the *username* is your Unix username. Make sure you log out of your shell and log in again after executing these steps.
+
 ===Running YoutubeFS on Linux===
 
    * Download the latest tar file 
@@ -12,4 +19,5 @@
    * Mount the Youtube filesystem using the following command
      * *./youtubefs.py <username> <mountpoint>*
 
+where the *username* is your youtube username
   
