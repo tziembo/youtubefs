@@ -9,10 +9,10 @@ import datetime
 import time
 from time import mktime 
 
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     datefmt='%a, %d %b %Y %H:%M:%S',
-                    filename='youtube.api.log',
+                    filename='/tmp/youtube.api.log',
                     filemode='w')
 
 PLAYLISTS_URI       = "http://gdata.youtube.com/feeds/" +\

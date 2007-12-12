@@ -7,10 +7,10 @@ import logging
 import threading
 import re
 
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     datefmt='%a, %d %b %Y %H:%M:%S',
-                    filename='youtube.fs.log',
+                    filename='/tmp/youtube.fs.log',
                     filemode='w')
 
 class counter:
