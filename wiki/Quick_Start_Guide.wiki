@@ -1,0 +1,8 @@
+Running YoutubeFS on Linux.
+
+   * Download the latest tar file 
+   * Extract the tar file 
+   * Mount the Youtube filesystem using the following command
+     * ./youtubefs.py <username> <mountpoint>*
+
+  
