@@ -89,8 +89,8 @@ class YoutubePlaylist:
                             == "application/x-shockwave-flash":
                     video.url   =  mediaContent[0].getAttribute('url')
                     video.type  =  mediaContent[0].getAttribute('type')
-                
-                videos.append(video)
+                if (video.url != ""):        
+                    videos.append(video)
         except Exception,inst:
             logging.critical("Invalid video XML format: " + \
                         str(inst))

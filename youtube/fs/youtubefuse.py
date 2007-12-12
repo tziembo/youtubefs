@@ -104,6 +104,21 @@ class YoutubeFUSE(Fuse):
         rootDirInode = self.inodeCache.getInode('/')
         rootDirInode.addChildInode(profileInode)
 
+    def __addVideos(self,parentPath,videos):
+        logging.debug("YoutubeFUSE adding videos inodes to %s",\
+            parentPath)
+        parentInode =  self.inodeCache.getInode(parentPath)
+        for video in videos:
+            logging.debug("YoutubeFUSE adding video %s",video.title)
+            mode = stat.S_IFREG | 0444
+            path = ("%s/%s.%s") % (parentPath,video.title,\
+                        youtube.fs.VIDEO_FILE_EXTENSION)
+            videoInode =  YoutubeFSInode(path,mode,\
+                        video.id,video.ctime,video.mtime)
+            videoInode.setData(video.getContents())
+            self.inodeCache.addInode(videoInode) 
+            parentInode.addChildInode(videoInode)
+
     def __addFavouritesInode(self):
         #
         # Get the favourite videos
@@ -115,16 +130,7 @@ class YoutubeFUSE(Fuse):
         self.inodeCache.addInode(favouritesInode) 
         rootDirInode = self.inodeCache.getInode('/')
         rootDirInode.addChildInode(favouritesInode)
-        
-        for video in favourities.getVideos():
-            mode = stat.S_IFREG | 0444
-            path = ("/favourites/%s.%s") % (video.title,\
-                        youtube.fs.VIDEO_FILE_EXTENSION)
-            videoInode =  YoutubeFSInode(path,mode,\
-                        video.id,video.ctime,video.mtime)
-            videoInode.setData(video.getContents())
-            self.inodeCache.addInode(videoInode) 
-            favouritesInode.addChildInode(videoInode)
+        self.__addVideos("/favourites",favourities.getVideos())       
 
     def __addPlaylists(self,parent,playlists):
         for playlist in playlists:
@@ -136,18 +142,7 @@ class YoutubeFUSE(Fuse):
                 0,playlist.ctime,playlist.mtime)
             self.inodeCache.addInode(playlistInode) 
             playlistsDirInode.addChildInode(playlistInode)
-   
-            for video in playlist.getVideos():
-                logging.debug("YoutubeFUSE trying to added a video")
-                mode = stat.S_IFREG | 0444
-                path = ("%s/%s.%s") % (plPath,video.title,\
-                        youtube.fs.VIDEO_FILE_EXTENSION)
-                logging.debug("YoutubeFUSE adding video %s",path)
-                videoInode =  YoutubeFSInode(path,mode,\
-                        video.id,video.ctime,video.mtime)
-                videoInode.setData(video.getContents())
-                self.inodeCache.addInode(videoInode) 
-                playlistInode.addChildInode(videoInode)
+            self.__addVideos(plPath,playlist.getVideos())
 
     def __addSubDir(self,parent,dir):
         regex = re.compile('//')
