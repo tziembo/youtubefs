@@ -1,5 +1,11 @@
 #labels Featured
-Running YoutubeFS on Linux.
+=== Required software ===
+   * python 2.5
+   * fuse (Filesystem in UserSpace) kernel module 
+   * fuse client library (libfuse2)
+   * python-fuse 
+
+===Running YoutubeFS on Linux===
 
    * Download the latest tar file 
    * Extract the tar file 
