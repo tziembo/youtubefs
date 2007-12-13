@@ -19,5 +19,5 @@ where the *username* is your Unix username. Make sure you log out of your shell 
    * Mount the Youtube filesystem using the following command
      * *./youtubefs.py <username> <mountpoint>*
 
-where the *username* is your youtube username
+where the *username* is your youtube username and *mountpoint* is the full path of the directory where the Youtube videos be located.
   
