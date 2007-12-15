@@ -1,0 +1,9 @@
+#summary Troubleshooting guide for YoutubeFS
+#labels Featured
+
+= Basic Troubleshooting =
+
+=== I do not see the Youtube video directories and files ===
+YoutubeFS dumps a log in the */tmp* directory each time you try mounting the file system. Please provide the contents of the log while reporting this kind of error. However in most cases this problem is related to a flaky internet connection.
+
+
