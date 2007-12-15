@@ -261,22 +261,4 @@ class YoutubeUser:
 
     def getContacts(self):
         pass
-
- 
-if __name__ == "__main__":
-    if (len(sys.argv) != 2):
-        print sys.argv[0] + " username "
-        sys.exit(1)
-
-    youtubeUser = YoutubeUser(sys.argv[1])
-    print youtubeUser.getProfile()
-    youtubeUser.getSubscriptions()
-#    favourities = youtubeUser.getFavourities()
-#    for video in favourities:
-#        print video
-#
-#    playlists = youtubeUser.getPlaylists()
-#    for playlist in playlists:
-#        playlist.getVideos()
-
  

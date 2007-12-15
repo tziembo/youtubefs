@@ -25,9 +25,6 @@ from youtube.fs.fsobjects import YoutubeFSInodeCache
 from youtube.fs.fsobjects import YoutubeFSInode
 import youtube.fs
 
-hello_path = '/hello'
-hello_str = 'Hello World!\n'
-
 class YoutubeFUSE(Fuse):
     def __init__(self, *args, **kw):
         Fuse.__init__(self, *args, **kw)
