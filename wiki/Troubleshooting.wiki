@@ -7,4 +7,4 @@
 YoutubeFS dumps a log in the */tmp* directory each time you try mounting the file system. Please provide the contents of the log while reporting this kind of error. However in most cases this problem is related to a flaky internet connection.
 
 === Contact ===
-Also you can email me at vishpat _@_ gmail _._ com
+Also you can email me at vishpat AT gmail DOT com
